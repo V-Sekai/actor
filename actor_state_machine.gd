@@ -41,15 +41,18 @@ func get_actor_controller():
 		
 func is_grounded():
 	return get_actor_controller().is_grounded()
+	
+func get_move_vector():
+	get_actor_controller().get_move_vector()
 		
 func set_move_vector(p_move_vector):
-	get_actor_controller().move_vector = p_move_vector
+	get_actor_controller().set_move_vector(p_move_vector)
 	
-func get_direction_normal():
-	return get_actor_controller().get_direction_normal()
+func get_direction_vector():
+	return get_actor_controller().get_direction_vector()
 	
-func set_direction_normal(p_normal):
-	get_actor_controller().set_direction_normal(p_normal)
+func set_direction_vector(p_normal):
+	get_actor_controller().set_direction_vector(p_normal)
 	
 func get_euler():
 	return get_actor_controller().get_euler()

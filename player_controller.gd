@@ -3,19 +3,27 @@ extends "actor_controller.gd"
 const actor_spawned_state_const = preload("states/actor_state_spawned.gd")
 const head_bob_const = preload("head_bob.gd")
 
-var input_direction = Vector2()
+var input_direction = Vector3()
 var input_magnitude = 0.0
 var is_moving = false
 var head_bob = null
 
 # Camera
-export(NodePath) var camera_controller_path = NodePath()
-onready var camera_controller = get_node(camera_controller_path)
+const player_camera_controller_const = preload("res://addons/actor/player_camera_controller.gd")
+
+export(NodePath) var camera_target_node_path = NodePath()
+onready var camera_target_node = get_node(camera_target_node_path)
+
+export(NodePath) var camera_height_node_path = NodePath()
+onready var camera_height_node = get_node(camera_height_node_path)
+
+export(NodePath) var camera_controller_node_path = NodePath()
+onready var camera_controller_node = get_node(camera_controller_node_path)
 
 # Movement
 var can_move = true
 
-export(float) var eye_height = 1.6
+export(float) var camera_height = 1.6
 export(float) var run_step_lengthen = 0.7
 export(float) var step_interval = 5.0
 
@@ -23,69 +31,42 @@ export(float) var step_interval = 5.0
 export(NodePath) var interactable_controller_path = NodePath()
 var interactable_controller = null
 
-# VR
-var vr_forwards_backwards = 0.0
-var vr_left_right = 0.0
-
-##############
-# Networking #
-##############
-
-func network_set_unreliable(p_property, p_value):
-	if (get_tree().has_network_peer()):
-		rset_unreliable(p_property, p_value)
-	else:
-		set(p_property, p_value)
-
 # Input
 sync var synced_input_direction = [0x00, 0x00]
 sync var synced_input_magnitude = 0x00
-# Movement
-slave var slave_origin = Vector3()
-slave var slave_euler = Vector2()
 
-###
+static func get_absoloute_basis(p_basis):
+	var m = p_basis.orthonormalized()
+	var det = m.determinant()
+	if (det < 0):
+		m = m.scaled(Vector3(-1, -1, -1))
+		
+	return m
 
-static func get_camera_relative_velocity(p_camera, p_input_direction):
+static func get_spatial_relative_movement_velocity(p_spatial, p_input_direction):
 	var new_direction = Vector3()
-	if(p_camera):
+	
+	if(p_spatial):
 		# Get the camera rotation
-		var m = p_camera.global_transform.basis.orthonormalized()
-		var det = m.determinant()
-		if (det < 0):
-			m = m.scaled(Vector3(-1, -1, -1));
+		var m = get_absoloute_basis(p_spatial.global_transform.basis)
 		
-		var camera_yaw = m.get_euler().y # Radians
-		var camera_normal = convert_euler_to_normal(Vector3(0.0, camera_yaw, 0.0))
+		var camera_yaw = m.get_euler().y # Radians	
+		var spatial_normal = convert_euler_to_normal(Vector3(0.0, camera_yaw, 0.0))
 		
-		new_direction += Vector3(-camera_normal.x, 0.0, -camera_normal.z) * p_input_direction.x
-		new_direction += Vector3(camera_normal.z, 0.0, -camera_normal.x) * p_input_direction.y
+		new_direction += Vector3(-spatial_normal.x, 0.0, -spatial_normal.z) * p_input_direction.x
+		new_direction += Vector3(spatial_normal.z, 0.0, -spatial_normal.x) * p_input_direction.y
 		
 	return new_direction
-		
-func turn(p_rot):
-	camera_controller.rotation_yaw += p_rot
-	camera_controller.rotation_yaw_smooth = camera_controller.rotation_yaw
-	camera_controller.rotation_yaw_velocity = 0.0
+	
+func get_relative_movement_velocity(p_input_direction):
+	return get_spatial_relative_movement_velocity(entity_node, p_input_direction)
 	
 func update_movement_input():
-	var vertical_movement = clamp(InputManager.axes_values["move_vertical"] + vr_forwards_backwards, -1.0, 1.0)
-	var horizontal_movement = clamp(InputManager.axes_values["move_horizontal"] + vr_left_right, -1.0, 1.0)
+	if is_entity_master():
+		var vertical_movement = clamp(InputManager.axes_values["move_vertical"], -1.0, 1.0)
+		var horizontal_movement = clamp(InputManager.axes_values["move_horizontal"], -1.0, 1.0)
 	
-	var vertical_movement_test = float(Input.get_action_strength("move_forwards")) - float(Input.get_action_strength("move_backwards"))
-	var horizontal_movement_test = float(Input.get_action_strength("move_right")) - float(Input.get_action_strength("move_left"))
-	
-	#vertical_movement = vertical_movement_test
-	#horizontal_movement = horizontal_movement_test
-	
-	get_node("../Label").set_text("vertical_movement: " + str(vertical_movement) + " / " + "horizontal_movement: " + str(horizontal_movement))
-
-	if VRManager.is_vr_mode_enabled():
-		input_direction = get_camera_relative_velocity(VRManager.arvr_origin.get_node("ARVRCamera"), Vector2(vertical_movement, horizontal_movement))
-		input_magnitude = clamp(input_direction.length_squared(), 0.0, 1.0)
-		input_direction = input_direction.normalized()
-	else:
-		input_direction = get_camera_relative_velocity(camera_controller, Vector2(vertical_movement, horizontal_movement))
+		input_direction = get_relative_movement_velocity(Vector2(vertical_movement, horizontal_movement))
 		input_magnitude = clamp(input_direction.length_squared(), 0.0, 1.0)
 		input_direction = input_direction.normalized()
 	
@@ -96,21 +77,8 @@ func client_movement(p_delta):
 	if(can_move):
 		state_machine.set_input_direction(input_direction)
 	
-	if (get_tree().has_network_peer()):
-		if(!get_tree().is_network_server()):
-			# Process the state machine on the client first to avoid any user input lag.
-			if state_machine:
-				state_machine.update_current_state(p_delta)
-				move(state_machine.move_direction)
-			
-			# Save client spatial information
-			slave_euler = euler
-			slave_origin = get_global_origin()
-		
 	synced_input_direction = [int(input_direction.x * 0xff), int(input_direction.z * 0xff)] # Encode new input velocity
-	network_set_unreliable("synced_input_direction", synced_input_direction)
 	synced_input_magnitude = int(input_magnitude * 0xff)
-	network_set_unreliable("synced_input_magnitude", synced_input_magnitude)
 	
 func server_movement(p_delta):
 	# Perform movement command on server
@@ -121,20 +89,7 @@ func server_movement(p_delta):
 		state_machine.update_current_state(p_delta)
 		move(move_vector)
 		
-	# Send updated information to the clients
-	slave_euler = euler
-	slave_origin = get_global_origin()
-	network_set_unreliable("slave_euler", slave_euler)
-	network_set_unreliable("slave_origin", get_global_origin())
-	
-	# Send input information to the clients
-	network_set_unreliable("synced_input_direction", synced_input_direction)
-	network_set_unreliable("synced_input_magnitude", synced_input_magnitude)
-
 func client_update(p_delta):
-	euler = slave_euler
-	
-	#adjust_render_rotation(direction, get_node("Render"))
 	#set_global_transform(Transform(Basis(), slave_origin))
 	
 	#progress_step_cycle(velocity, input_magnitude * walk_speed, p_delta)
@@ -144,45 +99,46 @@ func client_update(p_delta):
 	#	bob_controller.set_translation(head_bob.offset)
 	
 func _process(delta):
-	if VRManager.arvr_active == true:
+	if VRManager.is_arvr_active():
 		if VRManager.arvr_origin:
 			VRManager.arvr_origin.global_transform = get_global_origin()
-			VRManager.arvr_origin.set_rotation(Vector3(0.0, camera_controller.get_rotation().y, 0.0))
+			VRManager.arvr_origin.set_rotation(Vector3(0.0, camera_controller_node.get_rotation().y, 0.0))
 		
-
 func _physics_process(p_delta):
 	if !Engine.is_editor_hint():
+		if camera_controller_node:
+			camera_controller_node.update(p_delta)
+		
 		input_direction = Vector2(0.0, 0.0)
 		input_magnitude = 0.0
 		
-		if (get_tree().has_network_peer()):
-			if (is_network_master()):
-				client_movement(p_delta)
-		else:
+		if (is_entity_master()):
+			if camera_height_node:
+				camera_height_node.translation = Vector3(0.0, 1.0, 0.0) * camera_height
 			client_movement(p_delta)
 			
-		if (get_tree().has_network_peer()):
-			if (get_tree().is_network_server()):
-				server_movement(p_delta)
-		else:
+		if (NetworkManager.is_server()):
 			server_movement(p_delta)
 			
 		if interactable_controller:
 			interactable_controller.process(p_delta)
 			
 		client_update(p_delta)
-		
-func get_actor_eye_transform():
-	if camera_controller != null:
-		return camera_controller.global_transform
-	else:
-		return get_global_origin() + Transform(Basis(), extended_kinematic_body.up * eye_height)
 
 func _ready():
 	if !Engine.is_editor_hint():
-		state_machine.set_current_state(actor_spawned_state_const)
 		
-		# Assign the state machine
+		if has_node(camera_target_node_path):
+			camera_target_node = get_node(camera_target_node_path)
+		
+			if camera_target_node == self or not camera_target_node is Spatial:
+				camera_target_node = null
+			else:
+				# By default, kinematic body is not affected by its parent's movement
+				camera_target_node.set_as_toplevel(true)
+				camera_target_node.global_transform = Transform(Basis(), get_global_transform().origin)
+		
+		state_machine.set_current_state(actor_spawned_state_const)
 		
 		# Assign the interactable controller
 		if has_node(interactable_controller_path):
@@ -192,27 +148,28 @@ func _ready():
 			else:
 				interactable_controller.player_controller = self
 		
-		#if is_inside_tree() and global_game_manager_singleton:
-		#	if (get_tree().has_network_peer()):
-		#		if (is_network_master()):
-		#			global_game_manager_singleton.register_active_player_controller(self)
-		#	else:
-		#		global_game_manager_singleton.register_active_player_controller(self)
-			
-		#	if VRManager.is_vr_mode() == false:
-		#		if !global_game_manager_singleton.is_gameplay_camera_active():
-		#			bob_controller.add_child(global_game_manager_singleton.get_gameplay_camera())
+func _entity_ready():
+	._entity_ready()
+	
+	if is_entity_master():
+		pass
+		#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	else:
+		camera_controller_node.queue_free()
+		camera_controller_node.get_parent().remove_child(camera_controller_node)
+		camera_controller_node = null
+
+func _on_transform_changed():
+	._on_transform_changed()
+	
+	# Update the camera
+	if camera_controller_node:
+		if camera_controller_node.camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
+			var m = get_absoloute_basis(get_global_transform().basis)
+			camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y)
+	
+func _on_camera_internal_rotation_updated(p_camera_type):
+	if p_camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
+		var entity_basis = Basis().rotated(Vector3(0, 1, 0), deg2rad(-camera_controller_node.rotation_yaw))
 		
-		#head_bob = head_bob_const.new(self)
-		#get_tree().set_network_peer(NetworkedMultiplayerPeer.new())
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		
-func _exit_tree():
-	pass
-	#if !Engine.is_editor_hint():
-	#	if global_game_manager_singleton:
-	#		if (get_tree().has_network_peer()):
-	#			if (is_network_master()):
-	#				global_game_manager_singleton.unregister_active_player_controller()
-	#		else:
-	#			global_game_manager_singleton.unregister_active_player_controller()
+		set_global_transform(Transform(entity_basis, get_global_origin()))

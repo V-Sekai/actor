@@ -12,8 +12,8 @@ static func update(p_actor_state_machine, p_delta):
 		p_actor_state_machine.set_current_state(actor_state_falling_const)
 		return
 	
-	p_actor_state_machine.set_direction_normal((Vector3(p_actor_state_machine.input_direction.x, 0.0, p_actor_state_machine.input_direction.z)))
-	p_actor_state_machine.set_move_vector(p_actor_state_machine.get_direction_normal() * p_actor_state_machine.actor_controller.walk_speed * p_actor_state_machine.input_magnitude)
+	p_actor_state_machine.set_direction_vector((Vector3(p_actor_state_machine.input_direction.x, 0.0, p_actor_state_machine.input_direction.z)))
+	p_actor_state_machine.set_move_vector(p_actor_state_machine.get_direction_vector() * p_actor_state_machine.actor_controller.walk_speed * p_actor_state_machine.input_magnitude)
 		
 	if p_actor_state_machine.is_attempting_movement() == false:
 		p_actor_state_machine.set_current_state(actor_state_stop_const)

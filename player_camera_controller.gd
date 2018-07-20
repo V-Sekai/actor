@@ -12,7 +12,7 @@ onready var player_controller = null setget set_player_controller
 export(bool) var is_active = true
 export(bool) var lock_pitch = false
 
-enum {CAMERA_FIRST_PERSON = 0, CAMERA_THIRD_PERSON = 1}
+enum {CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON}
 
 var listener = null
 export(int, "First-Person", "Third-Person") var camera_type = CAMERA_FIRST_PERSON
@@ -26,16 +26,14 @@ var distance_velocity = 0.0
 var target_distance = distance
 
 # Rotation
+export(float) var interpolation_factor = 0.1
 export(float) var rotation_speed = 10
 export(float) var rotation_smoothing_factor = 0.08
 
-var rotation_yaw = 0.0
-var rotation_yaw_smooth = rotation_yaw
-var rotation_yaw_velocity = 0.0
+var interpolation_quat = Quat()
 
+var rotation_yaw = 0.0
 var rotation_pitch = 0.0
-var rotation_pitch_smooth = rotation_pitch
-var rotation_pitch_velocity = 0.0
 
 var rotation_pitch_min = -89.5
 var rotation_pitch_max = 89.5
@@ -43,6 +41,8 @@ var rotation_pitch_max = 89.5
 var exclusion_array = []
 
 export(int, FLAGS) var layer_mask = 1
+
+signal internal_rotation_updated(p_camera_type)
 
 static func normalize_angle(p_angle):
 	while (p_angle < 0):
@@ -101,7 +101,8 @@ func test_collision_point(p_ds, p_distance, p_start, p_end, p_offset):
 func calculate_final_transform(p_delta):
 	var ds = PhysicsServer.space_get_direct_state(get_world().get_space())
 	if(ds):
-		set_rotation_degrees(Vector3((-rotation_pitch_smooth), (-rotation_yaw_smooth), 0.0))
+		set_rotation(interpolation_quat.get_euler())
+		#set_rotation_degrees(Vector3((-rotation_pitch_smooth), (-rotation_yaw_smooth), 0.0))
 			
 		if camera_type == CAMERA_THIRD_PERSON:
 			var smooth_damp_return = GodotMathExtension.smooth_damp_scaler(distance, target_distance, distance_velocity, distance_speed, INF, p_delta)
@@ -158,29 +159,29 @@ func calculate_internal_rotation(p_delta):
 			y_direction = 1.0
 	
 		var input_x = (clamp((InputManager.axes_values["mouse_x"] + InputManager.axes_values["look_horizontal"]), -1.0, 1.0) * rotation_speed) * x_direction
-		var input_y = (clamp((InputManager.axes_values["mouse_y"] + InputManager.axes_values["look_vertical"]), -1.0, 1.0)* rotation_speed) * y_direction
+		var input_y = (clamp((InputManager.axes_values["mouse_y"] + InputManager.axes_values["look_vertical"]), -1.0, 1.0) * rotation_speed) * y_direction
 	
 		rotation_yaw += input_x
-		
-		var smooth_damp_return
-		smooth_damp_return = GodotMathExtension.smooth_damp_scaler(rotation_yaw_smooth, rotation_yaw, rotation_yaw_velocity, rotation_smoothing_factor, INF, p_delta)
-		rotation_yaw_smooth = smooth_damp_return.interpolation
-		rotation_yaw_velocity = smooth_damp_return.velocity
 		
 		if lock_pitch == false:
 			rotation_pitch -= input_y
 			rotation_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
-			
-			smooth_damp_return = GodotMathExtension.smooth_damp_scaler(rotation_pitch_smooth, rotation_pitch, rotation_pitch_velocity, rotation_smoothing_factor, INF, p_delta)
-			rotation_pitch_smooth = smooth_damp_return.interpolation
-			rotation_pitch_velocity = smooth_damp_return.velocity
-		
-			rotation_pitch_smooth = clamp(rotation_pitch_smooth, rotation_pitch_min, rotation_pitch_max)
 		else:
 			rotation_pitch = 0.0
-			rotation_pitch_smooth = 0.0
-			rotation_pitch_velocity = 0.0
+		
+		# Calculate smooth rotation
+		var final_quat = Quat()
+		final_quat.set_euler(Vector3(deg2rad(-rotation_pitch), deg2rad(-rotation_yaw), 0.0))
+		if interpolation_factor < 1.0:
+			interpolation_quat = interpolation_quat.slerp(final_quat, interpolation_factor)
+		else:
+			interpolation_quat = final_quat
+			
+		emit_signal("internal_rotation_updated", camera_type)
 
+func update(p_delta):
+	calculate_internal_rotation(p_delta)
+	calculate_final_transform(p_delta)
 
 func _ready():
 	if has_node(target_path):
@@ -195,10 +196,3 @@ func _ready():
 
 	if(!ProjectSettings.has_setting("gameplay/invert_look_y")):
 		ProjectSettings.set_setting("gameplay/invert_look_y", false)
-
-	set_physics_process(true)
-	set_process_input(true)
-
-func _physics_process(p_delta):
-	calculate_internal_rotation(p_delta)
-	calculate_final_transform(p_delta)

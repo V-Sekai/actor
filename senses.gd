@@ -10,7 +10,10 @@ var camera_planes = null
 
 func get_actor_eye_transform():
 	return Transform()
-	#return spatial_root.global_transform
+	#if camera_controller != null:
+	#	return camera_controller.global_transform
+	#else:
+	#	return get_global_origin() + Transform(Basis(), extended_kinematic_body.up * eye_height)
 	
 func can_see_collider_point(p_point, p_exclusion_array = [], p_collision_bits = 1):
 	var ds = PhysicsServer.space_get_direct_state(get_world().get_space())

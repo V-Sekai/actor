@@ -1,38 +1,34 @@
-extends Node
+extends "res://addons/state_machine/state_machine.gd"
 tool
 
 export(NodePath) var actor_controller_path = NodePath()
 var actor_controller = null
-var current_state = null
 
+func _change_state(state_name):
+	"""
+	The base state_machine interface this node extends does most of the work
+	"""
+	if not _active:
+		return
+	._change_state(state_name)
+	
 # Input actions
 var input_direction = Vector3() setget set_input_direction
 var input_magnitude = 0.0 setget set_input_magnitude
 var action_pressed = false
-
-# Settings
-export(bool) var instant_turning = false
 
 func set_input_direction(p_input_direction):
 	input_direction = p_input_direction
 	
 func set_input_magnitude(p_input_magnitude):
 	input_magnitude = p_input_magnitude
-
-func set_current_state(p_state):
-	if current_state == p_state:
-		return
-		
-	if current_state != null:
-		current_state.exit(self)
 	
-	current_state = p_state
-	current_state.enter(self)
+func get_input_direction():
+	return input_direction
 	
-func update_current_state(p_delta):
-	if current_state != null:
-		current_state.update(self, p_delta)
-		
+func get_input_magnitude():
+	return input_magnitude
+	
 func is_attempting_movement():
 	return input_direction.length() > 0.0 and input_magnitude > 0.0
 	
@@ -61,6 +57,12 @@ func set_euler(p_euler):
 	actor_controller.set_euler(p_euler)
 	
 func _ready():
-	if !Engine.is_editor_hint():
-		if has_node(actor_controller_path):
-			actor_controller = get_node(actor_controller_path)
+	states_map = {
+		"Spawned": $Spawned,
+		"Idle": $Idle,
+		"Locomotion": $Locomotion,
+		"Falling": $Falling,
+		"Stop": $Stop
+	}
+	
+	actor_controller = get_node(actor_controller_path)

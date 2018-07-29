@@ -1,6 +1,5 @@
 extends "actor_controller.gd"
 
-const actor_spawned_state_const = preload("states/actor_state_spawned.gd")
 const head_bob_const = preload("head_bob.gd")
 
 var input_direction = Vector3()
@@ -86,7 +85,7 @@ func server_movement(p_delta):
 	state_machine.set_input_direction(Vector3(float(synced_input_direction[0]) / 0xff, 0.0, float(synced_input_direction[1]) / 0xff).normalized())
 	state_machine.set_input_magnitude(input_magnitude)
 	if state_machine:
-		state_machine.update_current_state(p_delta)
+		state_machine.update(p_delta)
 		move(move_vector)
 		
 func client_update(p_delta):
@@ -98,12 +97,6 @@ func client_update(p_delta):
 	#if bob_controller:
 	#	bob_controller.set_translation(head_bob.offset)
 	
-func _process(delta):
-	if VRManager.is_arvr_active():
-		if VRManager.arvr_origin:
-			VRManager.arvr_origin.global_transform = get_global_origin()
-			VRManager.arvr_origin.set_rotation(Vector3(0.0, camera_controller_node.get_rotation().y, 0.0))
-		
 func _physics_process(p_delta):
 	if !Engine.is_editor_hint():
 		if camera_controller_node:
@@ -137,8 +130,6 @@ func _ready():
 				# By default, kinematic body is not affected by its parent's movement
 				camera_target_node.set_as_toplevel(true)
 				camera_target_node.global_transform = Transform(Basis(), get_global_transform().origin)
-		
-		state_machine.set_current_state(actor_spawned_state_const)
 		
 		# Assign the interactable controller
 		if has_node(interactable_controller_path):

@@ -1,10 +1,10 @@
-extends Reference
+extends "res://addons/state_machine/state.gd"
 
-static func enter(p_actor_state_machine):
+func enter():
 	pass
 
-static func update(p_actor_state_machine):
+func update(p_delta):
 	pass
 	
-static func exit(p_actor_state_machine):
+func exit():
 	pass

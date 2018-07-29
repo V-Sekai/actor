@@ -119,18 +119,19 @@ func calculate_final_transform(p_delta):
 			gt.origin = end
 			set_global_transform(gt)
 			
-			if camera_type == CAMERA_THIRD_PERSON:
-				var main_camera = CameraManager.get_main_camera()
-				if main_camera:
-					var upper_left = end - main_camera.project_position(Vector2(0.0, 0.0))
-					var upper_right = end - main_camera.project_position(Vector2(OS.get_window_size().x, 0.0))
-					var bottom_left = end - main_camera.project_position(Vector2(0.0, OS.get_window_size().y))
-					var bottom_right = end - main_camera.project_position(Vector2(OS.get_window_size().x, OS.get_window_size().y))
-					collision_distance = test_collision_point(ds, collision_distance, start, end, Vector3(0.0, 0.0, 0.0))
-					collision_distance = test_collision_point(ds, collision_distance, start, end, upper_left)
-					collision_distance = test_collision_point(ds, collision_distance, start, end, upper_right)
-					collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_left)
-					collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_right)
+			"""
+			var main_camera = CameraManager.get_main_camera()
+			if main_camera:
+				var upper_left = end - main_camera.project_position(Vector2(0.0, 0.0))
+				var upper_right = end - main_camera.project_position(Vector2(OS.get_window_size().x, 0.0))
+				var bottom_left = end - main_camera.project_position(Vector2(0.0, OS.get_window_size().y))
+				var bottom_right = end - main_camera.project_position(Vector2(OS.get_window_size().x, OS.get_window_size().y))
+				collision_distance = test_collision_point(ds, collision_distance, start, end, Vector3(0.0, 0.0, 0.0))
+				collision_distance = test_collision_point(ds, collision_distance, start, end, upper_left)
+				collision_distance = test_collision_point(ds, collision_distance, start, end, upper_right)
+				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_left)
+				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_right)
+			"""
 
 			end = Transform(get_global_transform().basis, start).xform(Vector3(0.0, 0.0, collision_distance))
 

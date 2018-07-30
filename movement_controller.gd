@@ -12,9 +12,6 @@ func set_kinematic_body(p_extended_kinematic_body):
 	
 func get_kinematic_body():
 	return extended_kinematic_body
-
-var target_velocity = Vector3(0.0, 0.0, 0.0)
-var velocity = Vector3(0.0, 0.0, 0.0)
 	
 static func convert_euler_to_normal(p_euler):
 	return Vector3(cos(p_euler.x) * sin(p_euler.y), -sin(p_euler.x), cos(p_euler.y) * cos(p_euler.x))

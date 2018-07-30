@@ -1,9 +1,6 @@
 extends "movement_controller.gd"
 tool
 
-# Finite state machine
-const actor_state_machine_const = preload("actor_state_machine.gd")
-
 export(NodePath) var state_machine_path = NodePath()
 var state_machine = null
 
@@ -74,6 +71,9 @@ func _ready():
 		set_process_input(false)
 		set_process_unhandled_key_input(false)
 		set_process_unhandled_input(false)
+		
+func get_gravity():
+	return (-9.8 * 3)
 		
 func _entity_ready():
 	._entity_ready()

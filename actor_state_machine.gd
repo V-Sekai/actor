@@ -39,7 +39,7 @@ func is_grounded():
 	return get_actor_controller().is_grounded()
 	
 func get_move_vector():
-	get_actor_controller().get_move_vector()
+	return get_actor_controller().get_move_vector()
 		
 func set_move_vector(p_move_vector):
 	get_actor_controller().set_move_vector(p_move_vector)
@@ -56,13 +56,20 @@ func get_euler():
 func set_euler(p_euler):
 	actor_controller.set_euler(p_euler)
 	
+func move(p_movement):
+	actor_controller.move(p_movement)
+	
 func _ready():
 	states_map = {
 		"Spawned": $Spawned,
 		"Idle": $Idle,
 		"Locomotion": $Locomotion,
 		"Falling": $Falling,
-		"Stop": $Stop
+		"Stop": $Stop,
+		"Landed": $Landed
 	}
 	
 	actor_controller = get_node(actor_controller_path)
+	
+func update(p_delta):
+	.update(p_delta)

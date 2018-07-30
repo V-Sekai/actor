@@ -4,7 +4,10 @@ func enter():
 	pass
 
 func update(p_delta):
-	change_state("Idle")
+	if state_machine.is_grounded():
+		change_state("Idle")
+	else:
+		change_state("Falling")
 	
 func exit():
 	pass

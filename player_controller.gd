@@ -86,7 +86,6 @@ func server_movement(p_delta):
 	state_machine.set_input_magnitude(input_magnitude)
 	if state_machine:
 		state_machine.update(p_delta)
-		move(move_vector)
 		
 func client_update(p_delta):
 	#set_global_transform(Transform(Basis(), slave_origin))

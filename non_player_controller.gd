@@ -49,5 +49,3 @@ func _ready() -> void:
 		if ai == null:
 			ai = ai_manager_singleton.create_ai()
 			ai.set_actor(self)
-		
-		state_machine.set_current_state(actor_spawned_state_const)

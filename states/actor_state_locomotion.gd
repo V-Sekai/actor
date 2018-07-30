@@ -10,7 +10,7 @@ func update(p_delta):
 		
 	var input_direction = state_machine.get_input_direction()
 	
-	state_machine.set_direction_vector((Vector3(input_direction.x, 0.0, input_direction.z)))
+	state_machine.set_direction_vector((Vector3(input_direction.x, 0.0, input_direction.y)))
 	state_machine.set_move_vector(state_machine.get_direction_vector() * state_machine.actor_controller.walk_speed * state_machine.get_input_magnitude())
 	
 	state_machine.move(state_machine.get_move_vector())

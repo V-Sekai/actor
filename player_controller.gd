@@ -56,6 +56,11 @@ static func get_spatial_relative_movement_velocity(p_spatial : Spatial, p_input_
 		new_direction += Vector3(spatial_normal.z, 0.0, -spatial_normal.x) * p_input_direction.y
 		
 	return new_direction
+
+# Automatically sets this entity name to correspond with its unique network ID
+func update_network_player_name():
+	if entity_node:
+		entity_node.set_name("Player_" + str(get_network_master()))
 	
 func get_relative_movement_velocity(p_input_direction : Vector2):
 	return get_spatial_relative_movement_velocity(entity_node, p_input_direction)
@@ -150,6 +155,8 @@ func _entity_ready() -> void:
 		camera_controller_node.queue_free()
 		camera_controller_node.get_parent().remove_child(camera_controller_node)
 		camera_controller_node = null
+		
+	update_network_player_name()
 
 func _on_transform_changed() -> void:
 	._on_transform_changed()

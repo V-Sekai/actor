@@ -14,27 +14,27 @@ _sections_unfolded = [ "Script" ]
 start_state = NodePath("Spawned")
 actor_controller_path = NodePath("")
 
-[node name="Spawned" type="Node" parent="." index="0"]
+[node name="Spawned" type="Node" parent="."]
 script = ExtResource( 2 )
 _sections_unfolded = [ "Script" ]
 
-[node name="Idle" type="Node" parent="." index="1"]
+[node name="Idle" type="Node" parent="."]
 script = ExtResource( 3 )
 _sections_unfolded = [ "Script" ]
 
-[node name="Falling" type="Node" parent="." index="2"]
+[node name="Falling" type="Node" parent="."]
 script = ExtResource( 4 )
 _sections_unfolded = [ "Script" ]
 
-[node name="Locomotion" type="Node" parent="." index="3"]
+[node name="Locomotion" type="Node" parent="."]
 script = ExtResource( 5 )
 _sections_unfolded = [ "Script" ]
 
-[node name="Stop" type="Node" parent="." index="4"]
+[node name="Stop" type="Node" parent="."]
 script = ExtResource( 6 )
 _sections_unfolded = [ "Script" ]
 
-[node name="Landed" type="Node" parent="." index="5"]
+[node name="Landed" type="Node" parent="."]
 script = ExtResource( 7 )
 _sections_unfolded = [ "Script", "script" ]
 

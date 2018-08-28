@@ -63,13 +63,14 @@ func update(p_delta : float) -> void:
 	.update(p_delta)
 	
 func _ready() -> void:
-	states_map = {
-		"Spawned": $Spawned,
-		"Idle": $Idle,
-		"Locomotion": $Locomotion,
-		"Falling": $Falling,
-		"Stop": $Stop,
-		"Landed": $Landed
-	}
-	
-	actor_controller = get_node(actor_controller_path)
+	if !Engine.is_editor_hint():
+		states_map = {
+			"Spawned": $Spawned,
+			"Idle": $Idle,
+			"Locomotion": $Locomotion,
+			"Falling": $Falling,
+			"Stop": $Stop,
+			"Landed": $Landed
+		}
+		
+		actor_controller = get_node(actor_controller_path)

@@ -3,12 +3,12 @@ tool
 
 const state_machine_const = preload("./actor_state_machine.gd")
 
-export(NodePath) var state_machine_path : NodePath = NodePath()
-var state_machine : state_machine_const = null
+export(NodePath) var _state_machine_path : NodePath = NodePath()
+var _state_machine : state_machine_const = null
 
 # Render
-export(NodePath) var third_person_render_node_path : NodePath = NodePath()
-onready var third_person_render_node : Node = get_node(third_person_render_node_path)
+export(NodePath) var _third_person_render_node_path : NodePath = NodePath()
+onready var _third_person_render_node : Node = get_node(_third_person_render_node_path)
 
 # Vector fed into the kinematic movement
 var move_vector : Vector3 = Vector3() setget set_move_vector, get_move_vector
@@ -34,37 +34,27 @@ export(float) var sprint_speed : float = 10.0
 export(float) var walk_speed : float = 5.0
 
 # Render
-export(NodePath) var render_node_path : NodePath = NodePath()
-var render_node : Spatial = null
-
-# Animation
-export(NodePath) var animation_tree_node_path : NodePath = NodePath()
-var animation_tree : AnimationTree = null
+export(NodePath) var _render_node_path : NodePath = NodePath()
+var _render_node : Spatial = null
 
 #var skeleton = null : Spatial
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
 		# Render node
-		if has_node(render_node_path):
-			render_node = get_node(render_node_path)
-			if render_node == self or not render_node is Spatial:
-				render_node = null
+		if has_node(_render_node_path):
+			_render_node = get_node(_render_node_path)
+			if _render_node == self or not _render_node is Spatial:
+				_render_node = null
 			else:
-				render_node.set_as_toplevel(true)
-				render_node.global_transform = Transform(Basis(), get_global_origin())
-				
-		# Animation node
-		if has_node(animation_tree_node_path):
-			animation_tree = get_node(animation_tree_node_path)
-			if animation_tree == self:
-				animation_tree = null
+				_render_node.set_as_toplevel(true)
+				_render_node.global_transform = Transform(Basis(), get_global_origin())
 			
 		# State machine node
-		if has_node(state_machine_path):
-			state_machine = get_node(state_machine_path)
-			if state_machine == self:
-				state_machine = null
+		if has_node(_state_machine_path):
+			_state_machine = get_node(_state_machine_path)
+			if _state_machine == self:
+				_state_machine = null
 	else:
 		set_process(false)
 		set_process_internal(false)
@@ -81,9 +71,9 @@ func _entity_ready() -> void:
 	._entity_ready()
 	
 	if is_entity_master():
-		third_person_render_node.hide()
+		_third_person_render_node.hide()
 	else:
-		third_person_render_node.show()
+		_third_person_render_node.show()
 		
 func _on_transform_changed():
 	._on_transform_changed()

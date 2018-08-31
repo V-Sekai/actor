@@ -31,8 +31,8 @@ export(NodePath) var _interactable_controller_path : NodePath = NodePath()
 var _interactable_controller : Node = null
 
 # Input
-sync var synced_input_direction : Array = [0x00, 0x00]
-sync var synced_input_magnitude : int = 0x00
+var synced_input_direction : Array = [0x00, 0x00]
+var synced_input_magnitude : int = 0x00
 
 static func get_absoloute_basis(p_basis : Basis) -> Basis:
 	var m : Basis = p_basis.orthonormalized()
@@ -86,7 +86,7 @@ func client_movement(p_delta : float) -> void:
 	synced_input_direction = [int(input_direction.x * 0xff), int(input_direction.y * 0xff)] # Encode new input velocity
 	synced_input_magnitude = int(input_magnitude * 0xff)
 	
-func server_movement(p_delta : float) -> void:
+func master_movement(p_delta : float) -> void:
 	# Perform movement command on server
 	input_magnitude = float(synced_input_magnitude) / 0xff
 	_state_machine.set_input_direction(Vector2(float(synced_input_direction[0]) / 0xff, float(synced_input_direction[1]) / 0xff).normalized())
@@ -95,8 +95,6 @@ func server_movement(p_delta : float) -> void:
 		_state_machine.update(p_delta)
 		
 func client_update(p_delta : float) -> void:
-	#set_global_transform(Transform(Basis(), slave_origin))
-	
 	#progress_step_cycle(velocity, input_magnitude * walk_speed, p_delta)
 	if head_bob:
 		head_bob.step(p_delta)
@@ -115,9 +113,7 @@ func _physics_process(p_delta : float) -> void:
 			if _camera_height_node:
 				_camera_height_node.translation = Vector3(0.0, 1.0, 0.0) * camera_height
 			client_movement(p_delta)
-			
-		if (NetworkManager.is_server()):
-			server_movement(p_delta)
+			master_movement(p_delta) # Restructure this!
 			
 		if _interactable_controller:
 			_interactable_controller.process(p_delta)

@@ -1,4 +1,5 @@
 extends Spatial
+tool
 
 const MAX_ANGLE = 360.0
 
@@ -28,7 +29,6 @@ var target_distance : float = distance
 # Rotation
 export(float) var interpolation_factor : float = 0.1
 export(float) var rotation_speed : float = 10
-export(float) var rotation_smoothing_factor : float = 0.08
 
 var interpolation_quat : Quat = Quat()
 
@@ -40,7 +40,7 @@ var rotation_pitch_max : float = 89.5
 
 var exclusion_array : Array = []
 
-export(int, FLAGS) var layer_mask : int = 1
+var collision_mask : int = 1
 
 signal internal_rotation_updated(p_camera_type)
 
@@ -71,7 +71,7 @@ func _enter_tree() -> void:
 	add_to_group("Listeners")
 
 func _exit_tree() -> void:
-	if(listener.is_inside_tree()):
+	if(listener and listener.is_inside_tree()):
 		listener.queue_free()
 
 func _input(p_event : InputEvent) -> void:
@@ -90,7 +90,7 @@ func _input(p_event : InputEvent) -> void:
 func test_collision_point(p_ds : PhysicsDirectSpaceState, p_distance : float, p_start : Vector3, p_end : Vector3, p_offset : Vector3) -> float:
 	var start_offset = p_start + p_offset
 	
-	var result = p_ds.intersect_ray(start_offset, p_end + p_offset, exclusion_array, layer_mask)
+	var result = p_ds.intersect_ray(start_offset, p_end + p_offset, exclusion_array, collision_mask)
 	if(result.empty() == false):
 		var new_distance : float = start_offset.distance_to(result.position)
 		if(new_distance < p_distance):
@@ -151,7 +151,7 @@ func calculate_final_transform(p_delta : float) -> void:
 			set_global_transform(gt)
 
 func calculate_internal_rotation(p_delta : float) -> void:
-	if is_active:
+	if is_active and p_delta > 0.0:
 		var x_direction : float = 1.0
 		var y_direction : float = 1.0
 	
@@ -184,21 +184,46 @@ func calculate_internal_rotation(p_delta : float) -> void:
 			interpolation_quat = final_quat
 			
 		emit_signal("internal_rotation_updated", camera_type)
+		
+func _get_property_list():
+	var property_list = []
+	
+	property_list.push_back({"name":"collision_mask", "type": TYPE_INT, "hint":PROPERTY_HINT_LAYERS_3D_PHYSICS})
+		
+	return property_list
+	
+func _set(p_property : String, p_value : int):
+	var split_property = p_property.split("/", -1)
+	if split_property.size() > 0:
+		if split_property.size() == 1:
+			if split_property[0] == "collision_mask":
+				collision_mask = p_value
+		
+func _get(p_property : String):
+	var split_property = p_property.split("/", -1)
+	if split_property.size() > 0:
+		if split_property.size() == 1:
+			if split_property[0] == "collision_mask":
+				return collision_mask
 
 func update(p_delta : float) -> void:
 	calculate_internal_rotation(p_delta)
 	calculate_final_transform(p_delta)
 
 func _ready() -> void:
-	if has_node(target_path):
-		set_target(get_node(target_path))
-	if has_node(player_controller_path):
-		set_player_controller(get_node(player_controller_path))
-
-	add_to_group("camera_controllers")
-
-	if(!ProjectSettings.has_setting("gameplay/invert_look_x")):
-		ProjectSettings.set_setting("gameplay/invert_look_x", false)
-
-	if(!ProjectSettings.has_setting("gameplay/invert_look_y")):
-		ProjectSettings.set_setting("gameplay/invert_look_y", false)
+	if Engine.is_editor_hint() == false:
+		if has_node(target_path):
+			set_target(get_node(target_path))
+		if has_node(player_controller_path):
+			set_player_controller(get_node(player_controller_path))
+	
+		add_to_group("camera_controllers")
+	
+		if(!ProjectSettings.has_setting("gameplay/invert_look_x")):
+			ProjectSettings.set_setting("gameplay/invert_look_x", false)
+	
+		if(!ProjectSettings.has_setting("gameplay/invert_look_y")):
+			ProjectSettings.set_setting("gameplay/invert_look_y", false)
+	else:
+		set_process(false)
+		set_physics_process(false)

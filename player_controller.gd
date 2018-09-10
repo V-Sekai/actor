@@ -1,11 +1,7 @@
 extends "actor_controller.gd"
 
-const head_bob_const = preload("head_bob.gd")
-
 var input_direction : Vector2 = Vector2()
 var input_magnitude : float = 0.0
-var is_moving : bool = false
-var head_bob : head_bob_const = null
 
 # Camera
 const player_camera_controller_const = preload("res://addons/actor/player_camera_controller.gd")
@@ -23,8 +19,6 @@ onready var _camera_controller_node : Spatial = get_node(_camera_controller_node
 var can_move : bool = true
 
 export(float) var camera_height : float = 1.6
-export(float) var run_step_lengthen : float = 0.7
-export(float) var step_interval : float = 5.0
 
 # Interaction
 export(NodePath) var _interactable_controller_path : NodePath = NodePath()
@@ -77,14 +71,15 @@ func update_movement_input() -> void:
 		input_direction = input_direction.normalized()
 	
 func client_movement(p_delta : float) -> void:
-	update_movement_input()
-	
-	_state_machine.set_input_direction(Vector2())
-	if(can_move):
-		_state_machine.set_input_direction(input_direction)
-	
-	synced_input_direction = [int(input_direction.x * 0xff), int(input_direction.y * 0xff)] # Encode new input velocity
-	synced_input_magnitude = int(input_magnitude * 0xff)
+	if p_delta > 0.0:
+		update_movement_input()
+		
+		_state_machine.set_input_direction(Vector2())
+		if(can_move):
+			_state_machine.set_input_direction(input_direction)
+		
+		synced_input_direction = [int(input_direction.x * 0xff), int(input_direction.y * 0xff)] # Encode new input velocity
+		synced_input_magnitude = int(input_magnitude * 0xff)
 	
 func master_movement(p_delta : float) -> void:
 	# Perform movement command on server
@@ -95,11 +90,8 @@ func master_movement(p_delta : float) -> void:
 		_state_machine.update(p_delta)
 		
 func client_update(p_delta : float) -> void:
-	#progress_step_cycle(velocity, input_magnitude * walk_speed, p_delta)
-	if head_bob:
-		head_bob.step(p_delta)
-	#if bob_controller:
-	#	bob_controller.set_translation(head_bob.offset)
+	if(p_delta > 0.0):
+		pass
 	
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():

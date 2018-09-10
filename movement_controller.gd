@@ -24,9 +24,6 @@ static func convert_euler_to_normal(p_euler : Vector3) -> Vector3:
 static func convert_normal_to_euler(p_normal : Vector3) -> Vector2:
 	return Vector2(asin(p_normal.y), atan2(p_normal.x, p_normal.z))
 
-static func interpolate_angle(p_current_angle : float, p_target_angle : float) -> float:
-	return p_target_angle
-	
 func set_direction_normal(p_normal : Vector3) -> void:
 	if p_normal == Vector3():
 		return

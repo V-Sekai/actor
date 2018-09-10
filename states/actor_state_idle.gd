@@ -8,11 +8,12 @@ func enter():
 		pass
 
 func update(p_delta):
-	if state_machine.is_attempting_movement():
-		change_state("Locomotion")
-		return
-	else:
-		pass
+	if p_delta > 0.0:
+		if state_machine.is_attempting_movement():
+			change_state("Locomotion")
+			return
+		else:
+			pass
 	
 func exit():
 	pass

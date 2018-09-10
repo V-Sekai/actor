@@ -15,7 +15,6 @@ func _change_state(state_name : String) -> void:
 # Input actions
 var input_direction : Vector2 = Vector2() setget set_input_direction
 var input_magnitude : float = 0.0 setget set_input_magnitude
-var action_pressed : bool = false
 
 func set_input_direction(p_input_direction : Vector2):
 	input_direction = p_input_direction

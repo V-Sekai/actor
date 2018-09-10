@@ -29,9 +29,20 @@ func get_direction_vector() -> Vector3:
 	return direction_vector
 
 # Movement stats
-export(float) var rotation_speed : float = 0.0
-export(float) var sprint_speed : float = 10.0
-export(float) var walk_speed : float = 5.0
+export(float) var sprint_speed : float = 10.0 setget set_sprint_speed, get_sprint_speed
+export(float) var walk_speed : float = 5.0 setget set_walk_speed, get_walk_speed
+
+func set_sprint_speed(p_speed : float) -> void:
+	sprint_speed = p_speed
+	
+func get_sprint_speed() -> float:
+	return sprint_speed
+
+func set_walk_speed(p_speed : float) -> void:
+	walk_speed = p_speed
+	
+func get_walk_speed() -> float:
+	return walk_speed
 
 # Render
 export(NodePath) var _render_node_path : NodePath = NodePath()

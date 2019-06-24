@@ -167,6 +167,7 @@ func calculate_internal_rotation(p_delta : float) -> void:
 		var input_x : float = (clamp((InputManager.axes_values["mouse_x"] + InputManager.axes_values["look_horizontal"]), -1.0, 1.0) * rotation_speed) * x_direction
 		var input_y : float = (clamp((InputManager.axes_values["mouse_y"] + InputManager.axes_values["look_vertical"]), -1.0, 1.0) * rotation_speed) * y_direction
 	
+	
 		rotation_yaw += input_x
 		
 		if lock_pitch == false:

@@ -28,7 +28,7 @@ var _interactable_controller : Node = null
 var synced_input_direction : Array = [0x00, 0x00]
 var synced_input_magnitude : int = 0x00
 
-static func get_absoloute_basis(p_basis : Basis) -> Basis:
+static func get_absolute_basis(p_basis : Basis) -> Basis:
 	var m : Basis = p_basis.orthonormalized()
 	var det : float = m.determinant()
 	if (det < 0):
@@ -41,7 +41,7 @@ static func get_spatial_relative_movement_velocity(p_spatial : Spatial, p_input_
 	
 	if(p_spatial):
 		# Get the camera rotation
-		var m : Basis = get_absoloute_basis(p_spatial.global_transform.basis)
+		var m : Basis = get_absolute_basis(p_spatial.global_transform.basis)
 		
 		var camera_yaw : float = m.get_euler().y # Radians	
 		var spatial_normal : Vector3 = convert_euler_to_normal(Vector3(0.0, camera_yaw, 0.0))
@@ -149,7 +149,7 @@ func _on_transform_changed() -> void:
 	# Update the camera
 	if _camera_controller_node:
 		if _camera_controller_node.camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
-			var m : Basis = get_absoloute_basis(get_global_transform().basis)
+			var m : Basis = get_absolute_basis(get_global_transform().basis)
 			_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y)
 	
 func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:

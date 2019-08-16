@@ -3,6 +3,9 @@ tool
 
 const MAX_ANGLE = 360.0
 
+var arvr_origin : ARVROrigin = null
+var arvr_camera : ARVRCamera = null
+
 export(NodePath) var target_path : NodePath = NodePath()
 onready var target : Spatial = null setget set_target
 export(Vector3) var target_offset : Vector3 = Vector3()
@@ -15,7 +18,6 @@ export(bool) var lock_pitch : bool = false
 
 enum {CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON}
 
-var listener = null
 export(int, "First-Person", "Third-Person") var camera_type : int = CAMERA_FIRST_PERSON
 
 # Distance
@@ -66,13 +68,10 @@ func set_player_controller(p_player_controller : Node) -> void:
 	exclusion_array = [player_controller]
 
 func _enter_tree() -> void:
-	listener = Listener.new()
-	add_child(listener)
-	add_to_group("Listeners")
+	pass
 
 func _exit_tree() -> void:
-	if(listener and listener.is_inside_tree()):
-		listener.queue_free()
+	pass
 
 func _input(p_event : InputEvent) -> void:
 	if(p_event is InputEventMouseButton):
@@ -123,7 +122,6 @@ func calculate_final_transform(p_delta : float) -> void:
 			gt.origin = end
 			set_global_transform(gt)
 			
-			"""
 			var main_camera = CameraManager.get_main_camera()
 			if main_camera:
 				var upper_left = end - main_camera.project_position(Vector2(0.0, 0.0))
@@ -135,7 +133,6 @@ func calculate_final_transform(p_delta : float) -> void:
 				collision_distance = test_collision_point(ds, collision_distance, start, end, upper_right)
 				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_left)
 				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_right)
-			"""
 
 			xform = Transform(get_global_transform().basis, start).xform(Vector3(0.0, 0.0, collision_distance))
 			end = xform
@@ -186,19 +183,22 @@ func calculate_internal_rotation(p_delta : float) -> void:
 			
 		emit_signal("internal_rotation_updated", camera_type)
 		
-func _get_property_list():
+func _get_property_list() -> Array:
 	var property_list = []
 	
-	property_list.push_back({"name":"collision_mask", "type": TYPE_INT, "hint":PROPERTY_HINT_LAYERS_3D_PHYSICS})
+	property_list.push_back({"name":"collision_mask", "type":TYPE_INT, "hint":PROPERTY_HINT_LAYERS_3D_PHYSICS})
 		
 	return property_list
 	
-func _set(p_property : String, p_value : int):
+func _set(p_property : String, p_value : int) -> bool:
 	var split_property = p_property.split("/", -1)
 	if split_property.size() > 0:
 		if split_property.size() == 1:
 			if split_property[0] == "collision_mask":
 				collision_mask = p_value
+				return true
+				
+	return false
 		
 func _get(p_property : String):
 	var split_property = p_property.split("/", -1)
@@ -210,6 +210,9 @@ func _get(p_property : String):
 func update(p_delta : float) -> void:
 	calculate_internal_rotation(p_delta)
 	calculate_final_transform(p_delta)
+
+func _process(delta):
+	arvr_origin.transform = global_transform
 
 func _ready() -> void:
 	if Engine.is_editor_hint() == false:
@@ -225,6 +228,11 @@ func _ready() -> void:
 	
 		if(!ProjectSettings.has_setting("gameplay/invert_look_y")):
 			ProjectSettings.set_setting("gameplay/invert_look_y", false)
+		
+		arvr_origin = $ARVROrigin
+		arvr_camera = $ARVROrigin/ARVRCamera
+			
+		arvr_origin.set_as_toplevel(true)
 	else:
 		set_process(false)
 		set_physics_process(false)

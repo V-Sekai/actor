@@ -3,26 +3,20 @@ tool
 
 const MAX_SLIDE_ATTEMPTS = 4
 
+const controller_helpers_const = preload("res://addons/actor/controller_helpers.gd")
+
 const extended_kinematic_body_const = preload("res://addons/extended_kinematic_body/extended_kinematic_body.gd")
 export(NodePath) var _extended_kinematic_body_path : NodePath = NodePath()
 var _extended_kinematic_body : extended_kinematic_body_const = null setget set_kinematic_body, get_kinematic_body
+
+export(NodePath) var _internal_rotation_path : NodePath = NodePath()
+var _internal_rotation : Spatial = null
 
 func set_kinematic_body(p_extended_kinematic_body : extended_kinematic_body_const) -> void:
 	_extended_kinematic_body = p_extended_kinematic_body
 	
 func get_kinematic_body() -> extended_kinematic_body_const:
 	return _extended_kinematic_body
-	
-static func get_direction_to(p_start : Vector3, p_end : Vector3) -> Vector3:
-	var dir = p_end - p_start
-	dir = dir.normalized()
-	return dir
-	
-static func convert_euler_to_normal(p_euler : Vector3) -> Vector3:
-	return Vector3(cos(p_euler.x) * sin(p_euler.y), -sin(p_euler.x), cos(p_euler.y) * cos(p_euler.x))
-	
-static func convert_normal_to_euler(p_normal : Vector3) -> Vector2:
-	return Vector2(asin(p_normal.y), atan2(p_normal.x, p_normal.z))
 
 func set_direction_normal(p_normal : Vector3) -> void:
 	if p_normal == Vector3():
@@ -52,3 +46,12 @@ func _ready() -> void:
 			# By default, kinematic body is not affected by its parent's movement
 			_extended_kinematic_body.set_as_toplevel(true)
 			_extended_kinematic_body.global_transform = Transform(Basis(), get_global_transform().origin)
+			
+	if has_node(_internal_rotation_path):
+		_internal_rotation = get_node(_internal_rotation_path)
+	
+		if _internal_rotation == self or not _internal_rotation is Spatial:
+			_internal_rotation = _entity_node
+		else:
+			_internal_rotation.set_as_toplevel(true)
+			_internal_rotation.global_transform = Transform(Basis(), get_global_transform().origin)

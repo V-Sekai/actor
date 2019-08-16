@@ -18,46 +18,22 @@ onready var _camera_controller_node : Spatial = get_node(_camera_controller_node
 # Movement
 var can_move : bool = true
 
-export(float) var camera_height : float = 1.6
-
-# Interaction
-export(NodePath) var _interactable_controller_path : NodePath = NodePath()
-var _interactable_controller : Node = null
+export(float) var camera_height : float = 1.8
 
 # Input
 var synced_input_direction : Array = [0x00, 0x00]
 var synced_input_magnitude : int = 0x00
 
-static func get_absolute_basis(p_basis : Basis) -> Basis:
-	var m : Basis = p_basis.orthonormalized()
-	var det : float = m.determinant()
-	if (det < 0):
-		m = m.scaled(Vector3(-1, -1, -1))
-		
-	return m
-
-static func get_spatial_relative_movement_velocity(p_spatial : Spatial, p_input_direction : Vector2) -> Vector3:
-	var new_direction : Vector3 = Vector3()
-	
-	if(p_spatial):
-		# Get the camera rotation
-		var m : Basis = get_absolute_basis(p_spatial.global_transform.basis)
-		
-		var camera_yaw : float = m.get_euler().y # Radians	
-		var spatial_normal : Vector3 = convert_euler_to_normal(Vector3(0.0, camera_yaw, 0.0))
-		
-		new_direction += Vector3(-spatial_normal.x, 0.0, -spatial_normal.z) * p_input_direction.x
-		new_direction += Vector3(spatial_normal.z, 0.0, -spatial_normal.x) * p_input_direction.y
-		
-	return new_direction
+# VR
+const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")
 
 # Automatically sets this entity name to correspond with its unique network ID
-func update_network_player_name():
+func update_network_player_name() -> void:
 	if _entity_node:
 		_entity_node.set_name("Player_" + str(get_network_master()))
 	
-func get_relative_movement_velocity(p_input_direction : Vector2):
-	return get_spatial_relative_movement_velocity(_entity_node, p_input_direction)
+func get_relative_movement_velocity(p_input_direction : Vector2) -> Vector3:
+	return controller_helpers_const.get_spatial_relative_movement_velocity(_internal_rotation, p_input_direction)
 	
 func update_movement_input() -> void:
 	if is_entity_master():
@@ -88,33 +64,37 @@ func master_movement(p_delta : float) -> void:
 	_state_machine.set_input_magnitude(input_magnitude)
 	if _state_machine:
 		_state_machine.update(p_delta)
-		
-func client_update(p_delta : float) -> void:
-	if(p_delta > 0.0):
-		pass
 	
+func update_vr_camera_state():
+	if _camera_height_node:
+		if VRManager.is_arvr_active():
+			_camera_height_node.translation = Vector3(0.0, 0.0, 0.0)
+			_camera_controller_node.lock_pitch = true
+		else:
+			_camera_height_node.translation = Vector3(0.0, 1.0, 0.0) * camera_height
+			_camera_controller_node.lock_pitch = false
+	
+func _process(p_delta : float) -> void:
+	if !Engine.is_editor_hint():
+		if p_delta > 0.0:
+			if is_entity_master():
+				update_vr_camera_state()
+				
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
-		if _camera_controller_node:
-			_camera_controller_node.update(p_delta)
-		
-		input_direction = Vector2(0.0, 0.0)
-		input_magnitude = 0.0
-		
-		if (is_entity_master()):
-			if _camera_height_node:
-				_camera_height_node.translation = Vector3(0.0, 1.0, 0.0) * camera_height
-			client_movement(p_delta)
-			master_movement(p_delta) # Restructure this!
+		if p_delta > 0.0:
+			input_direction = Vector2(0.0, 0.0)
+			input_magnitude = 0.0
 			
-		if _interactable_controller:
-			_interactable_controller.process(p_delta)
+			if _camera_controller_node:
+				_camera_controller_node.update(p_delta)
 			
-		client_update(p_delta)
+			if is_entity_master():
+				client_movement(p_delta)
+				master_movement(p_delta) # Restructure this!
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
-		
 		if has_node(_camera_target_node_path):
 			_camera_target_node = get_node(_camera_target_node_path)
 		
@@ -125,16 +105,10 @@ func _ready() -> void:
 				_camera_target_node.set_as_toplevel(true)
 				_camera_target_node.global_transform = Transform(Basis(), get_global_transform().origin)
 		
-		# Assign the interactable controller
-		_interactable_controller = cache_node(_interactable_controller_path)
-		if _interactable_controller:
-			_interactable_controller.player_controller = self
-		
 func _entity_ready() -> void:
 	._entity_ready()
 	
 	if is_entity_master():
-		pass
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
 		_camera_controller_node.queue_free()
@@ -149,11 +123,24 @@ func _on_transform_changed() -> void:
 	# Update the camera
 	if _camera_controller_node:
 		if _camera_controller_node.camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
-			var m : Basis = get_absolute_basis(get_global_transform().basis)
+			var m : Basis = controller_helpers_const.get_absolute_basis(get_global_transform().basis)
 			_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y)
 	
 func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
 	if p_camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
-		var entity_basis : Basis = Basis().rotated(Vector3(0, 1, 0), deg2rad(-_camera_controller_node.rotation_yaw))
+		var camera_controller_yaw = Basis().rotated(Vector3(0, 1, 0), deg2rad(-_camera_controller_node.rotation_yaw))
 		
-		set_global_transform(Transform(entity_basis, get_global_origin()))
+		# Movement directions are relative to this
+		match VRManager.movement_orientation:
+			vr_manager_const.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
+				_internal_rotation.set_global_transform(Transform(_camera_controller_node.arvr_camera.global_transform.basis, get_global_origin()))
+			vr_manager_const.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
+				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
+			vr_manager_const.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
+				# TODO: add support for this
+				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
+			_:
+				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
+		
+		# Overall entity rotation
+		set_global_transform(Transform(camera_controller_yaw, get_global_origin()))

@@ -15,6 +15,9 @@ onready var _camera_height_node : Spatial = get_node(_camera_height_node_path)
 export(NodePath) var _camera_controller_node_path : NodePath = NodePath()
 onready var _camera_controller_node : Spatial = get_node(_camera_controller_node_path)
 
+export(NodePath) var _vr_player_node_path : NodePath = NodePath()
+onready var _vr_player_node : ARVROrigin = get_node(_vr_player_node_path)
+
 # Movement
 var can_move : bool = true
 
@@ -37,8 +40,14 @@ func get_relative_movement_velocity(p_input_direction : Vector2) -> Vector3:
 	
 func update_movement_input() -> void:
 	if is_entity_master():
-		var vertical_movement : float = clamp(InputManager.axes_values["move_vertical"], -1.0, 1.0)
-		var horizontal_movement : float = clamp(InputManager.axes_values["move_horizontal"], -1.0, 1.0)
+		# Depends on the presence of the VR Player node
+		var vr_movement_input : Vector2 = Vector2()
+		if _vr_player_node != null:
+			vr_movement_input = _vr_player_node.get_controller_movement_vector()
+		###
+		
+		var horizontal_movement : float = clamp(InputManager.axes_values["move_horizontal"] + vr_movement_input.x, -1.0, 1.0)
+		var vertical_movement : float = clamp(InputManager.axes_values["move_vertical"] + vr_movement_input.y, -1.0, 1.0)
 	
 		var input_direction_vec3 : Vector3 = get_relative_movement_velocity(Vector2(vertical_movement, horizontal_movement))
 		

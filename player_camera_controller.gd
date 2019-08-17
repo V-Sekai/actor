@@ -10,8 +10,8 @@ export(NodePath) var target_path : NodePath = NodePath()
 onready var target : Spatial = null setget set_target
 export(Vector3) var target_offset : Vector3 = Vector3()
 
-export(NodePath) var player_controller_path : NodePath = NodePath()
-onready var player_controller : Node = null setget set_player_controller
+export(NodePath) var kinematic_player_controller_path : NodePath = NodePath()
+onready var kinematic_player_controller : Node = null setget set_kinematic_player_controller
 
 export(bool) var is_active : bool = true
 export(bool) var lock_pitch : bool = false
@@ -60,12 +60,12 @@ func set_target(p_target : Spatial) -> void:
 	else:
 		target = null
 		
-func set_player_controller(p_player_controller : Node) -> void:
-	if p_player_controller != null and p_player_controller is Spatial and p_player_controller != self:
-		player_controller = p_player_controller
+func set_kinematic_player_controller(p_kinematic_player_controller : Node) -> void:
+	if p_kinematic_player_controller != null and p_kinematic_player_controller is Spatial and p_kinematic_player_controller != self:
+		kinematic_player_controller = p_kinematic_player_controller
 	else:
-		player_controller = null
-	exclusion_array = [player_controller]
+		kinematic_player_controller = null
+	exclusion_array = [kinematic_player_controller]
 
 func _enter_tree() -> void:
 	pass
@@ -122,7 +122,7 @@ func calculate_final_transform(p_delta : float) -> void:
 			gt.origin = end
 			set_global_transform(gt)
 			
-			var main_camera = CameraManager.get_main_camera()
+			"""var main_camera = CameraManager.get_main_camera()
 			if main_camera:
 				var upper_left = end - main_camera.project_position(Vector2(0.0, 0.0))
 				var upper_right = end - main_camera.project_position(Vector2(OS.get_window_size().x, 0.0))
@@ -132,7 +132,7 @@ func calculate_final_transform(p_delta : float) -> void:
 				collision_distance = test_collision_point(ds, collision_distance, start, end, upper_left)
 				collision_distance = test_collision_point(ds, collision_distance, start, end, upper_right)
 				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_left)
-				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_right)
+				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_right)"""
 
 			xform = Transform(get_global_transform().basis, start).xform(Vector3(0.0, 0.0, collision_distance))
 			end = xform
@@ -160,10 +160,14 @@ func calculate_internal_rotation(p_delta : float) -> void:
 			y_direction = -1.0
 		else:
 			y_direction = 1.0
-	
-		var input_x : float = (clamp((InputManager.axes_values["mouse_x"] + InputManager.axes_values["look_horizontal"]), -1.0, 1.0) * rotation_speed) * x_direction
-		var input_y : float = (clamp((InputManager.axes_values["mouse_y"] + InputManager.axes_values["look_vertical"]), -1.0, 1.0) * rotation_speed) * y_direction
-	
+			
+		# TODO: clean up and unify this with regular player controller
+		var vr_turning_vector : Vector2 = Vector2()
+		if arvr_origin:
+			vr_turning_vector = arvr_origin.get_controller_turning_vector()
+
+		var input_x : float = (clamp((InputManager.axes_values["mouse_x"] + InputManager.axes_values["look_horizontal"] + vr_turning_vector.x), -1.0, 1.0) * rotation_speed) * x_direction
+		var input_y : float = (clamp((InputManager.axes_values["mouse_y"] + InputManager.axes_values["look_vertical"] + vr_turning_vector.y), -1.0, 1.0) * rotation_speed) * y_direction
 	
 		rotation_yaw += input_x
 		
@@ -211,15 +215,16 @@ func update(p_delta : float) -> void:
 	calculate_internal_rotation(p_delta)
 	calculate_final_transform(p_delta)
 
-func _process(delta):
-	arvr_origin.transform = global_transform
+func _process(p_delta):
+	if p_delta > 0.0:
+		arvr_origin.transform = global_transform
 
 func _ready() -> void:
 	if Engine.is_editor_hint() == false:
 		if has_node(target_path):
 			set_target(get_node(target_path))
-		if has_node(player_controller_path):
-			set_player_controller(get_node(player_controller_path))
+		if has_node(kinematic_player_controller_path):
+			set_kinematic_player_controller(get_node(kinematic_player_controller_path))
 	
 		add_to_group("camera_controllers")
 	
@@ -229,9 +234,9 @@ func _ready() -> void:
 		if(!ProjectSettings.has_setting("gameplay/invert_look_y")):
 			ProjectSettings.set_setting("gameplay/invert_look_y", false)
 		
+		# TODO: Clean this up
 		arvr_origin = $ARVROrigin
 		arvr_camera = $ARVROrigin/ARVRCamera
-			
 		arvr_origin.set_as_toplevel(true)
 	else:
 		set_process(false)

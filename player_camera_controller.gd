@@ -42,7 +42,7 @@ var rotation_pitch_max : float = 89.5
 
 var exclusion_array : Array = []
 
-var collision_mask : int = 1
+export(int, LAYERS_3D_PHYSICS) var collision_mask : int = 1
 
 signal internal_rotation_updated(p_camera_type)
 
@@ -186,30 +186,6 @@ func calculate_internal_rotation(p_delta : float) -> void:
 			interpolation_quat = final_quat
 			
 		emit_signal("internal_rotation_updated", camera_type)
-		
-func _get_property_list() -> Array:
-	var property_list = []
-	
-	property_list.push_back({"name":"collision_mask", "type":TYPE_INT, "hint":PROPERTY_HINT_LAYERS_3D_PHYSICS})
-		
-	return property_list
-	
-func _set(p_property : String, p_value : int) -> bool:
-	var split_property = p_property.split("/", -1)
-	if split_property.size() > 0:
-		if split_property.size() == 1:
-			if split_property[0] == "collision_mask":
-				collision_mask = p_value
-				return true
-				
-	return false
-		
-func _get(p_property : String):
-	var split_property = p_property.split("/", -1)
-	if split_property.size() > 0:
-		if split_property.size() == 1:
-			if split_property[0] == "collision_mask":
-				return collision_mask
 
 func update(p_delta : float) -> void:
 	calculate_internal_rotation(p_delta)

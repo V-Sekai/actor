@@ -238,6 +238,9 @@ func _ready() -> void:
 		arvr_origin = $ARVROrigin
 		arvr_camera = $ARVROrigin/ARVRCamera
 		arvr_origin.set_as_toplevel(true)
+		
+		if arvr_camera:
+			arvr_camera.set_current(true)
 	else:
 		set_process(false)
 		set_physics_process(false)

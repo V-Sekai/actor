@@ -18,6 +18,9 @@ onready var _camera_controller_node : Spatial = get_node(_camera_controller_node
 export(NodePath) var _vr_player_node_path : NodePath = NodePath()
 onready var _vr_player_node : ARVROrigin = get_node(_vr_player_node_path)
 
+export(int, LAYERS_3D_PHYSICS) var local_player_collision : int = 1
+export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
+
 # Movement
 var can_move : bool = true
 
@@ -118,8 +121,12 @@ func _entity_ready() -> void:
 	._entity_ready()
 	
 	if is_entity_master():
+		if _extended_kinematic_body:
+			_extended_kinematic_body.collision_layer = local_player_collision
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
+		if _extended_kinematic_body:
+			_extended_kinematic_body.collision_layer = other_player_collision
 		_camera_controller_node.queue_free()
 		_camera_controller_node.get_parent().remove_child(_camera_controller_node)
 		_camera_controller_node = null

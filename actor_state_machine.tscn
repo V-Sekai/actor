@@ -18,14 +18,14 @@ script = ExtResource( 2 )
 [node name="Idle" type="Node" parent="."]
 script = ExtResource( 3 )
 
-[node name="Falling" type="Node" parent="."]
-script = ExtResource( 4 )
+[node name="Landed" type="Node" parent="."]
+script = ExtResource( 7 )
 
 [node name="Locomotion" type="Node" parent="."]
 script = ExtResource( 5 )
 
+[node name="Falling" type="Node" parent="."]
+script = ExtResource( 4 )
+
 [node name="Stop" type="Node" parent="."]
 script = ExtResource( 6 )
-
-[node name="Landed" type="Node" parent="."]
-script = ExtResource( 7 )

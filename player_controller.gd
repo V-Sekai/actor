@@ -153,8 +153,7 @@ func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
 			vr_manager_const.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
 				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
 			vr_manager_const.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
-				# TODO: add support for this
-				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
+				_internal_rotation.set_global_transform(Transform(_camera_controller_node.arvr_origin.get_controller_direction(), get_global_origin()))
 			_:
 				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
 		

@@ -79,7 +79,7 @@ func master_movement(p_delta : float) -> void:
 	
 func update_vr_camera_state():
 	if _camera_height_node:
-		if VRManager.is_arvr_active():
+		if VRManager.is_xr_active():
 			_camera_height_node.translation = Vector3(0.0, 0.0, 0.0)
 			_camera_controller_node.lock_pitch = true
 		else:

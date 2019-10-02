@@ -1,10 +1,13 @@
 extends Spatial
 tool
 
-const MAX_ANGLE = 360.0
+const MAX_ANGLE : float = 360.0
 
-var arvr_origin : ARVROrigin = null
-var arvr_camera : ARVRCamera = null
+export(NodePath) var camera_path : NodePath = NodePath()
+var camera : Camera = null
+
+export(NodePath) var origin_path : NodePath = NodePath()
+var origin : Spatial = null
 
 export(NodePath) var target_path : NodePath = NodePath()
 onready var target : Spatial = null setget set_target
@@ -14,7 +17,6 @@ export(NodePath) var kinematic_player_controller_path : NodePath = NodePath()
 onready var kinematic_player_controller : Node = null setget set_kinematic_player_controller
 
 export(bool) var is_active : bool = true
-export(bool) var lock_pitch : bool = false
 
 enum {CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON}
 
@@ -98,30 +100,28 @@ func test_collision_point(p_ds : PhysicsDirectSpaceState, p_distance : float, p_
 	return p_distance
 
 func calculate_final_transform(p_delta : float) -> void:
-	var ds : PhysicsDirectSpaceState = PhysicsServer.space_get_direct_state(get_world().get_space())
-	if(ds):
-		set_rotation(interpolation_quat.get_euler())
-		#set_rotation_degrees(Vector3((-rotation_pitch_smooth), (-rotation_yaw_smooth), 0.0))
-			
-		if camera_type == CAMERA_THIRD_PERSON:
-			var smooth_damp_return : Dictionary = GodotMathExtension.smooth_damp_scaler(distance, target_distance, distance_velocity, distance_speed, INF, p_delta)
-			distance = smooth_damp_return.interpolation
-			distance_velocity = smooth_damp_return.velocity
+	set_rotation(interpolation_quat.get_euler())
+	if camera_type == CAMERA_THIRD_PERSON:
+		var ds : PhysicsDirectSpaceState = PhysicsServer.space_get_direct_state(get_world().get_space())
+		var smooth_damp_return : Dictionary = GodotMathExtension.smooth_damp_scaler(distance, target_distance, distance_velocity, distance_speed, INF, p_delta)
+		distance = smooth_damp_return.interpolation
+		distance_velocity = smooth_damp_return.velocity
 
-			var collision_distance : float = distance
-			var start : Vector3 = get_parent().global_transform.origin
-			if target:
-				start = target.global_transform.origin + target_offset
-			var xform = Transform(global_transform.basis, start).xform(Vector3(0.0, 0.0, collision_distance))
-			if !typeof(xform) == TYPE_VECTOR3:
-				printerr("calculate_final_transform: invalid type!")
-			
-			var end : Vector3 = xform
+		var collision_distance : float = distance
+		var start : Vector3 = get_parent().global_transform.origin
+		if target:
+			start = target.global_transform.origin + target_offset
+		var xform = Transform(global_transform.basis, start).xform(Vector3(0.0, 0.0, collision_distance))
+		if !typeof(xform) == TYPE_VECTOR3:
+			printerr("calculate_final_transform: invalid type!")
+		
+		var end : Vector3 = xform
 
-			var gt : Transform = global_transform
-			gt.origin = end
-			set_global_transform(gt)
-			
+		var gt : Transform = global_transform
+		gt.origin = end
+		set_global_transform(gt)
+		
+		if(ds):
 			"""var main_camera = CameraManager.get_main_camera()
 			if main_camera:
 				var upper_left = end - main_camera.project_position(Vector2(0.0, 0.0))
@@ -134,48 +134,23 @@ func calculate_final_transform(p_delta : float) -> void:
 				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_left)
 				collision_distance = test_collision_point(ds, collision_distance, start, end, bottom_right)"""
 
-			xform = Transform(get_global_transform().basis, start).xform(Vector3(0.0, 0.0, collision_distance))
-			end = xform
+		xform = Transform(get_global_transform().basis, start).xform(Vector3(0.0, 0.0, collision_distance))
+		end = xform
 
-			gt = get_global_transform()
-			gt.origin = end
-			set_global_transform(gt)
-		else:
-			var gt : Transform = get_global_transform()
-			gt.origin = get_parent().get_global_transform().origin
-			if target:
-				gt.origin = target.get_global_transform().origin
-			set_global_transform(gt)
+		gt = get_global_transform()
+		gt.origin = end
+		set_global_transform(gt)
+	else:
+		var gt : Transform = get_global_transform()
+		gt.origin = get_parent().get_global_transform().origin
+		if target:
+			gt.origin = target.get_global_transform().origin
+		set_global_transform(gt)
 
 func calculate_internal_rotation(p_delta : float) -> void:
 	if is_active and p_delta > 0.0:
-		var x_direction : float = 1.0
-		var y_direction : float = 1.0
-	
-		if(ProjectSettings.get("gameplay/invert_look_x") == true):
-			x_direction = -1.0
-		else:
-			x_direction = 1.0
-		if(ProjectSettings.get("gameplay/invert_look_y") == true):
-			y_direction = -1.0
-		else:
-			y_direction = 1.0
-			
-		# TODO: clean up and unify this with regular player controller
-		var vr_turning_vector : Vector2 = Vector2()
-		if arvr_origin:
-			vr_turning_vector = arvr_origin.get_controller_turning_vector()
-
-		var input_x : float = (clamp((InputManager.axes_values["mouse_x"] + InputManager.axes_values["look_horizontal"] + vr_turning_vector.x), -1.0, 1.0) * rotation_speed) * x_direction
-		var input_y : float = (clamp((InputManager.axes_values["mouse_y"] + InputManager.axes_values["look_vertical"] + vr_turning_vector.y), -1.0, 1.0) * rotation_speed) * y_direction
-	
-		rotation_yaw += input_x
 		
-		if lock_pitch == false:
-			rotation_pitch -= input_y
-			rotation_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
-		else:
-			rotation_pitch = 0.0
+		rotation_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
 		
 		# Calculate smooth rotation
 		var final_quat : Quat = Quat()
@@ -193,7 +168,7 @@ func update(p_delta : float) -> void:
 
 func _process(p_delta):
 	if p_delta > 0.0:
-		arvr_origin.transform = global_transform
+		origin.transform = global_transform
 
 func _ready() -> void:
 	if Engine.is_editor_hint() == false:
@@ -210,13 +185,13 @@ func _ready() -> void:
 		if(!ProjectSettings.has_setting("gameplay/invert_look_y")):
 			ProjectSettings.set_setting("gameplay/invert_look_y", false)
 		
-		# TODO: Clean this up
-		arvr_origin = $ARVROrigin
-		arvr_camera = $ARVROrigin/ARVRCamera
-		arvr_origin.set_as_toplevel(true)
+		camera = get_node_or_null(camera_path)
+		if camera:
+			camera.set_current(true)
 		
-		if arvr_camera:
-			arvr_camera.set_current(true)
+		origin = get_node_or_null(origin_path)
+		if origin:
+			origin.set_as_toplevel(true)
 	else:
 		set_process(false)
 		set_physics_process(false)

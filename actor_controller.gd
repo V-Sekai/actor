@@ -81,10 +81,12 @@ func get_gravity() -> float:
 func _entity_ready() -> void:
 	._entity_ready()
 	
-	if is_entity_master():
+	"""if is_entity_master():
 		_third_person_render_node.hide()
 	else:
-		_third_person_render_node.show()
+		_third_person_render_node.show()"""
+		
+	_third_person_render_node.show()
 		
 func _on_transform_changed():
 	._on_transform_changed()

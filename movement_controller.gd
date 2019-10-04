@@ -51,7 +51,7 @@ func _ready() -> void:
 		_internal_rotation = get_node(_internal_rotation_path)
 	
 		if _internal_rotation == self or not _internal_rotation is Spatial:
-			_internal_rotation = _entity_node
+			_internal_rotation = get_entity_node()
 		else:
 			_internal_rotation.set_as_toplevel(true)
 			_internal_rotation.global_transform = Transform(Basis(), get_global_transform().origin)

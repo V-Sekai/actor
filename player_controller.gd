@@ -7,14 +7,8 @@ const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")
 export(NodePath) var _camera_target_node_path : NodePath = NodePath()
 onready var _camera_target_node : Spatial = get_node(_camera_target_node_path)
 
-export(NodePath) var _camera_height_node_path : NodePath = NodePath()
-onready var _camera_height_node : Spatial = get_node(_camera_height_node_path)
-
 export(NodePath) var _camera_controller_node_path : NodePath = NodePath()
 onready var _camera_controller_node : Spatial = get_node(_camera_controller_node_path)
-
-export(NodePath) var _origin_node_path : NodePath = NodePath()
-onready var _origin_node : ARVROrigin = get_node(_origin_node_path)
 
 export(NodePath) var _player_input_path : NodePath = NodePath()
 onready var _player_input : Node = get_node(_player_input_path)
@@ -47,8 +41,9 @@ func master_movement(p_delta : float) -> void:
 		
 # Automatically sets this entity name to correspond with its unique network ID
 func update_network_player_name() -> void:
-	if _entity_node:
-		_entity_node.set_name("Player_" + str(get_network_master()))
+	var entity_node : Node = get_entity_node()
+	if entity_node:
+		entity_node.set_name("Player_" + str(get_network_master()))
 		
 func preprocess_master_or_puppet_state() -> void:
 	if is_entity_master():
@@ -82,6 +77,7 @@ func _physics_process(p_delta : float) -> void:
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
+		preprocess_master_or_puppet_state()
 		if has_node(_camera_target_node_path):
 			_camera_target_node = get_node(_camera_target_node_path)
 			
@@ -95,7 +91,6 @@ func _ready() -> void:
 func _entity_ready() -> void:
 	._entity_ready()
 	
-	preprocess_master_or_puppet_state()
 	update_network_player_name()
 
 func _on_transform_changed() -> void:

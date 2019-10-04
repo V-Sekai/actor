@@ -31,8 +31,8 @@ var distance_velocity : float = 0.0
 var target_distance : float = distance
 
 # Rotation
-export(float) var interpolation_factor : float = 0.1
-export(float) var rotation_speed : float = 10
+export(float) var interpolation_factor : float = 1.0
+export(float) var rotation_speed : float = 100
 
 var interpolation_quat : Quat = Quat()
 

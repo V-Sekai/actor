@@ -16,7 +16,10 @@ onready var _player_input : Node = get_node(_player_input_path)
 export(int, LAYERS_3D_PHYSICS) var local_player_collision : int = 1
 export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
 
-# Movement
+# Movement / Interpolation
+var previous_origin : Vector3 = Vector3()
+var current_origin : Vector3 = Vector3()
+
 var can_move : bool = true
 	
 func client_movement(p_delta : float) -> void:
@@ -65,6 +68,12 @@ func _process(p_delta : float) -> void:
 			if is_entity_master():
 				_player_input.update(p_delta)
 				
+			# Do interpolated movement
+			if _camera_controller_node:
+				_camera_controller_node.transform.origin = previous_origin.linear_interpolate(
+				current_origin, Engine.get_physics_interpolation_fraction()
+				)
+				
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
 		if p_delta > 0.0:
@@ -74,6 +83,13 @@ func _physics_process(p_delta : float) -> void:
 			if is_entity_master():
 				client_movement(p_delta)
 				master_movement(p_delta) # Restructure this!
+				
+			# There is a slight delay in the movement, but this allows framerate independent movement
+			previous_origin = current_origin
+			current_origin = get_entity_node().global_transform.origin
+			
+			if _camera_controller_node:
+				_camera_controller_node.transform.origin = previous_origin
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
@@ -86,7 +102,10 @@ func _ready() -> void:
 			else:
 				# By default, kinematic body is not affected by its parent's movement
 				_camera_target_node.set_as_toplevel(true)
-				_camera_target_node.global_transform = Transform(Basis(), get_global_transform().origin)
+				
+				previous_origin = get_global_transform().origin
+				current_origin = get_global_transform().origin
+				_camera_target_node.global_transform = Transform(Basis(), current_origin)
 		
 func _entity_ready() -> void:
 	._entity_ready()

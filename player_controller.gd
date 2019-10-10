@@ -16,6 +16,8 @@ onready var _player_input : Node = get_node(_player_input_path)
 export(int, LAYERS_3D_PHYSICS) var local_player_collision : int = 1
 export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
 
+onready var physics_fps : int = ProjectSettings.get("physics/common/physics_fps")
+
 # Movement / Interpolation
 var previous_origin : Vector3 = Vector3()
 var current_origin : Vector3 = Vector3()
@@ -41,6 +43,18 @@ func master_movement(p_delta : float) -> void:
 	_state_machine.set_input_magnitude(_player_input.input_magnitude)
 	if _state_machine:
 		_state_machine.update(p_delta)
+		
+func move(p_target_velocity : Vector3) -> Vector3:
+	var offset_movement : Vector3 = Vector3()
+	if _player_input:
+		# Get any potential offset (head-position, VR for this frame)
+		var offset : Vector3 = _player_input.get_transformed_offset()
+		# Compensate for the offset
+		current_origin += offset
+		# Scale to the timestep
+		offset_movement = offset * physics_fps
+		
+	return .move(p_target_velocity + offset_movement)
 		
 # Automatically sets this entity name to correspond with its unique network ID
 func update_network_player_name() -> void:
@@ -77,6 +91,9 @@ func _process(p_delta : float) -> void:
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
 		if p_delta > 0.0:
+			if is_entity_master():
+				_player_input.update(p_delta)
+			
 			_player_input.input_direction = Vector2(0.0, 0.0)
 			_player_input.input_magnitude = 0.0
 			

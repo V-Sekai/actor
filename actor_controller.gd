@@ -1,7 +1,7 @@
 extends "movement_controller.gd"
 tool
 
-const state_machine_const = preload("./actor_state_machine.gd")
+const state_machine_const = preload("actor_state_machine.gd")
 
 export(NodePath) var _state_machine_path : NodePath = NodePath()
 var _state_machine : state_machine_const = null

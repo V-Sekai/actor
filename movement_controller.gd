@@ -26,9 +26,14 @@ func set_direction_normal(p_normal : Vector3) -> void:
 func get_direction_normal() -> Vector3:
 	return get_global_transform().basis.z
 	
-func move(p_target_velocity : Vector3) -> void:
-	_extended_kinematic_body.extended_move(p_target_velocity, MAX_SLIDE_ATTEMPTS)
-	set_global_transform(Transform(get_global_transform().basis, _extended_kinematic_body.global_transform.origin))
+func move(p_target_velocity : Vector3) -> Vector3:
+	var motion : Vector3 = Vector3()
+	
+	if p_target_velocity.length() > 0.0:
+		motion = _extended_kinematic_body.extended_move(p_target_velocity, MAX_SLIDE_ATTEMPTS)
+		set_global_transform(Transform(get_global_transform().basis, _extended_kinematic_body.global_transform.origin))
+	
+	return motion
 	
 func is_grounded() -> bool:
 	return _extended_kinematic_body.is_grounded

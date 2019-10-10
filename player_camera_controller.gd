@@ -44,6 +44,8 @@ var rotation_pitch_max : float = 89.5
 
 var exclusion_array : Array = []
 
+var origin_offset : Vector3 = Vector3()
+
 export(int, LAYERS_3D_PHYSICS) var collision_mask : int = 1
 
 signal internal_rotation_updated(p_camera_type)
@@ -89,9 +91,9 @@ func _input(p_event : InputEvent) -> void:
 			target_distance = distance_min
 
 func test_collision_point(p_ds : PhysicsDirectSpaceState, p_distance : float, p_start : Vector3, p_end : Vector3, p_offset : Vector3) -> float:
-	var start_offset = p_start + p_offset
+	var start_offset : Vector3 = p_start + p_offset
 	
-	var result = p_ds.intersect_ray(start_offset, p_end + p_offset, exclusion_array, collision_mask)
+	var result : Dictionary = p_ds.intersect_ray(start_offset, p_end + p_offset, exclusion_array, collision_mask)
 	if(result.empty() == false):
 		var new_distance : float = start_offset.distance_to(result.position)
 		if(new_distance < p_distance):
@@ -111,7 +113,7 @@ func calculate_final_transform(p_delta : float) -> void:
 		var start : Vector3 = get_parent().global_transform.origin
 		if target:
 			start = target.global_transform.origin + target_offset
-		var xform = Transform(global_transform.basis, start).xform(Vector3(0.0, 0.0, collision_distance))
+		var xform : Vector3 = Transform(global_transform.basis, start).xform(Vector3(0.0, 0.0, collision_distance))
 		if !typeof(xform) == TYPE_VECTOR3:
 			printerr("calculate_final_transform: invalid type!")
 		
@@ -145,7 +147,7 @@ func calculate_final_transform(p_delta : float) -> void:
 		gt.origin = get_parent().get_global_transform().origin
 		if target:
 			gt.origin = target.get_global_transform().origin
-		set_global_transform(gt)
+		#set_global_transform(gt)
 
 func calculate_internal_rotation(p_delta : float) -> void:
 	if is_active and p_delta > 0.0:
@@ -169,6 +171,7 @@ func update(p_delta : float) -> void:
 func _process(p_delta):
 	if p_delta > 0.0:
 		origin.transform = global_transform
+		origin.translate(origin_offset)
 
 func _ready() -> void:
 	if Engine.is_editor_hint() == false:

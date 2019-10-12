@@ -181,12 +181,6 @@ func _ready() -> void:
 			set_kinematic_player_controller(get_node(kinematic_player_controller_path))
 	
 		add_to_group("camera_controllers")
-	
-		if(!ProjectSettings.has_setting("gameplay/invert_look_x")):
-			ProjectSettings.set_setting("gameplay/invert_look_x", false)
-	
-		if(!ProjectSettings.has_setting("gameplay/invert_look_y")):
-			ProjectSettings.set_setting("gameplay/invert_look_y", false)
 		
 		camera = get_node_or_null(camera_path)
 		if camera:

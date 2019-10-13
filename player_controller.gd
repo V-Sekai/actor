@@ -83,8 +83,8 @@ func _process(p_delta : float) -> void:
 				_player_input.update(p_delta)
 				
 			# Do interpolated movement
-			if _camera_controller_node:
-				_camera_controller_node.transform.origin = previous_origin.linear_interpolate(
+			if _camera_target_node:
+				_camera_target_node.transform.origin = previous_origin.linear_interpolate(
 				current_origin, Engine.get_physics_interpolation_fraction()
 				)
 				
@@ -105,8 +105,8 @@ func _physics_process(p_delta : float) -> void:
 			previous_origin = current_origin
 			current_origin = get_entity_node().global_transform.origin
 			
-			if _camera_controller_node:
-				_camera_controller_node.transform.origin = previous_origin
+			if _camera_target_node:
+				_camera_target_node.transform.origin = previous_origin
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():

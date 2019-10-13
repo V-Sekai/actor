@@ -107,6 +107,9 @@ func _physics_process(p_delta : float) -> void:
 			
 			if _camera_target_node:
 				_camera_target_node.transform.origin = previous_origin
+				
+			if !is_entity_master():
+				_extended_kinematic_body.global_transform.origin = get_global_origin()
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():

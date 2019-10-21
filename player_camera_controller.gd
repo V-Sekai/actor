@@ -3,11 +3,10 @@ tool
 
 const MAX_ANGLE : float = 360.0
 
-export(NodePath) var camera_path : NodePath = NodePath()
-var camera : Camera = null
+const player_origin_const = preload("res://assets/scenes/player_origin.tscn")
 
-export(NodePath) var origin_path : NodePath = NodePath()
 var origin : Spatial = null
+var camera : Camera = null
 
 export(NodePath) var target_path : NodePath = NodePath()
 onready var target : Spatial = null setget set_target
@@ -32,7 +31,6 @@ var target_distance : float = distance
 
 # Rotation
 export(float) var interpolation_factor : float = 1.0
-export(float) var rotation_speed : float = 100
 
 var interpolation_quat : Quat = Quat()
 
@@ -182,13 +180,12 @@ func _ready() -> void:
 	
 		add_to_group("camera_controllers")
 		
-		camera = get_node_or_null(camera_path)
+		origin = player_origin_const.instance()
+		GroupsGameFlowManager.gameroot.add_child(origin)
+		origin.set_as_toplevel(true)
+		camera = origin.get_node_or_null("ARVRCamera")
 		if camera:
 			camera.set_current(true)
-		
-		origin = get_node_or_null(origin_path)
-		if origin:
-			origin.set_as_toplevel(true)
 	else:
 		set_process(false)
 		set_physics_process(false)

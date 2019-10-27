@@ -88,6 +88,12 @@ func _process(p_delta : float) -> void:
 				current_origin, Engine.get_physics_interpolation_fraction()
 				)
 				
+			if _render_node:
+				_render_node.transform.origin = previous_origin.linear_interpolate(
+				current_origin, Engine.get_physics_interpolation_fraction()
+				)
+				_render_node.transform.basis = get_global_transform().basis
+				
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
 		if p_delta > 0.0:

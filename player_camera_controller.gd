@@ -166,10 +166,9 @@ func update(p_delta : float) -> void:
 	calculate_internal_rotation(p_delta)
 	calculate_final_transform(p_delta)
 
-func _process(p_delta):
-	if p_delta > 0.0:
-		origin.transform = global_transform
-		origin.translate(origin_offset)
+func update_origin(p_origin_offset):
+	origin_offset = p_origin_offset
+	origin.transform = global_transform * Transform(Basis(), -origin_offset)
 
 func _ready() -> void:
 	if Engine.is_editor_hint() == false:

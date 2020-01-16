@@ -7,6 +7,9 @@ const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")
 export(NodePath) var _camera_target_node_path : NodePath = NodePath()
 onready var _camera_target_node : Spatial = get_node(_camera_target_node_path)
 
+export(NodePath) var _camera_target_smooth_node_path : NodePath = NodePath()
+onready var _camera_target_smooth_node : Spatial = get_node(_camera_target_smooth_node_path)
+
 export(NodePath) var _camera_controller_node_path : NodePath = NodePath()
 onready var _camera_controller_node : Spatial = get_node(_camera_controller_node_path)
 
@@ -18,10 +21,12 @@ export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
 
 onready var physics_fps : int = ProjectSettings.get("physics/common/physics_fps")
 
-# Movement / Interpolation
-var previous_origin : Vector3 = Vector3()
-var current_origin : Vector3 = Vector3()
+# The offset between the camera position and ARVROrigin center (none transformed)
+var frame_offset : Vector3 = Vector3()
+var origin_offset : Vector3 = Vector3() 
 
+# Movement / Interpolation
+var current_origin : Vector3 = Vector3()
 var can_move : bool = true
 	
 func client_movement(p_delta : float) -> void:
@@ -45,16 +50,19 @@ func master_movement(p_delta : float) -> void:
 		_state_machine.update(p_delta)
 		
 func move(p_target_velocity : Vector3) -> Vector3:
-	var offset_movement : Vector3 = Vector3()
+	var transformed_frame_offset : Vector3 = Vector3()
 	if _player_input:
 		# Get any potential offset (head-position, VR for this frame)
-		var offset : Vector3 = _player_input.get_transformed_offset()
-		# Compensate for the offset
-		current_origin += offset
-		# Scale to the timestep
-		offset_movement = offset * physics_fps
+		frame_offset = _player_input.get_head_accumulator()
+		transformed_frame_offset = _player_input.transform_origin_offset(frame_offset)
+		_player_input.clear_head_accumulator()
 		
-	return .move(p_target_velocity + offset_movement)
+		# Compensate for the offset
+		origin_offset += frame_offset
+		
+	var move_ret : Vector3 = .move(p_target_velocity + (transformed_frame_offset * physics_fps))
+	#set_global_transform(Transform(get_entity_node().global_transform.basis, _extended_kinematic_body.global_transform.origin))
+	return move_ret
 		
 # Automatically sets this entity name to correspond with its unique network ID
 func update_network_player_name() -> void:
@@ -76,29 +84,33 @@ func preprocess_master_or_puppet_state() -> void:
 		
 	update_network_player_name()
 		
+func apply_origin_offset() -> void:
+	var transformed_frame_offset = _player_input.transform_origin_offset(frame_offset)
+	_camera_target_smooth_node.add_offset(transformed_frame_offset)
+		
 func _process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
 		if p_delta > 0.0:
 			if is_entity_master():
-				_player_input.update(p_delta)
-				
-			# Do interpolated movement
-			if _camera_target_node:
-				_camera_target_node.transform.origin = previous_origin.linear_interpolate(
-				current_origin, Engine.get_physics_interpolation_fraction()
-				)
+				_player_input.update_input(p_delta)
+				_player_input.update_origin(origin_offset)
 				
 			if _render_node:
-				_render_node.transform.origin = previous_origin.linear_interpolate(
-				current_origin, Engine.get_physics_interpolation_fraction()
-				)
+				_player_input.update_head_accumulation()
+				var camera_offset : Vector3 = _player_input.transform_origin_offset(_player_input.get_head_accumulator())
+				_render_node.transform.origin = _camera_target_smooth_node.transform.origin + camera_offset
 				_render_node.transform.basis = get_global_transform().basis
+				
+			var ik_space : Spatial = _render_node.get_node_or_null("IKSpace")
+			if ik_space:
+				ik_space.update(p_delta)
 				
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
 		if p_delta > 0.0:
 			if is_entity_master():
-				_player_input.update(p_delta)
+				_player_input.update_head_accumulation()
+				_player_input.update_input(p_delta)
 			
 			_player_input.input_direction = Vector2(0.0, 0.0)
 			_player_input.input_magnitude = 0.0
@@ -108,11 +120,11 @@ func _physics_process(p_delta : float) -> void:
 				master_movement(p_delta) # Restructure this!
 				
 			# There is a slight delay in the movement, but this allows framerate independent movement
-			previous_origin = current_origin
 			current_origin = get_entity_node().global_transform.origin
 			
 			if _camera_target_node:
-				_camera_target_node.transform.origin = previous_origin
+				_camera_target_node.transform.origin = current_origin
+				apply_origin_offset()
 				
 			if !is_entity_master():
 				_extended_kinematic_body.global_transform.origin = get_global_origin()
@@ -128,11 +140,13 @@ func _ready() -> void:
 			else:
 				# By default, kinematic body is not affected by its parent's movement
 				_camera_target_node.set_as_toplevel(true)
+				_camera_target_smooth_node.set_as_toplevel(true)
 				
-				previous_origin = get_global_transform().origin
 				current_origin = get_global_transform().origin
 				_camera_target_node.global_transform = Transform(Basis(), current_origin)
-		
+				_camera_target_smooth_node.global_transform = _camera_target_node.global_transform
+			_camera_target_smooth_node.teleport()
+
 func _entity_ready() -> void:
 	._entity_ready()
 	

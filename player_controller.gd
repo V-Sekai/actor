@@ -95,10 +95,13 @@ func _process(p_delta : float) -> void:
 				_player_input.update_input(p_delta)
 				_player_input.update_origin(origin_offset)
 				
-			if _render_node:
-				_player_input.update_head_accumulation()
-				var camera_offset : Vector3 = _player_input.transform_origin_offset(_player_input.get_head_accumulator())
-				_render_node.transform.origin = _camera_target_smooth_node.transform.origin + camera_offset
+				if _render_node:
+					_player_input.update_head_accumulation()
+					var camera_offset : Vector3 = _player_input.transform_origin_offset(_player_input.get_head_accumulator())
+					_render_node.transform.origin = _camera_target_smooth_node.transform.origin + camera_offset
+					_render_node.transform.basis = get_global_transform().basis
+			else:
+				_render_node.transform.origin = _camera_target_smooth_node.transform.origin
 				_render_node.transform.basis = get_global_transform().basis
 				
 			var ik_space : Spatial = _render_node.get_node_or_null("IKSpace")
@@ -124,7 +127,8 @@ func _physics_process(p_delta : float) -> void:
 			
 			if _camera_target_node:
 				_camera_target_node.transform.origin = current_origin
-				apply_origin_offset()
+				if is_entity_master():
+					apply_origin_offset()
 				
 			if !is_entity_master():
 				_extended_kinematic_body.global_transform.origin = get_global_origin()

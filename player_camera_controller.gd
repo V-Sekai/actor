@@ -69,12 +69,6 @@ func set_kinematic_player_controller(p_kinematic_player_controller : Node) -> vo
 		kinematic_player_controller = null
 	exclusion_array = [kinematic_player_controller]
 
-func _enter_tree() -> void:
-	pass
-
-func _exit_tree() -> void:
-	pass
-
 func _input(p_event : InputEvent) -> void:
 	if(p_event is InputEventMouseButton):
 		if (p_event.button_index == BUTTON_WHEEL_UP):
@@ -182,6 +176,8 @@ func _ready() -> void:
 		origin = player_origin_const.instance()
 		GroupsGameFlowManager.gameroot.add_child(origin)
 		origin.set_as_toplevel(true)
+		update_origin(origin_offset)
+		
 		camera = origin.get_node_or_null("ARVRCamera")
 		if camera:
 			camera.set_current(true)

@@ -21,6 +21,8 @@ export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
 
 onready var physics_fps : int = ProjectSettings.get("physics/common/physics_fps")
 
+var _ik_space : Spatial = null
+
 # The offset between the camera position and ARVROrigin center (none transformed)
 var frame_offset : Vector3 = Vector3()
 var origin_offset : Vector3 = Vector3() 
@@ -102,9 +104,10 @@ func _process(p_delta : float) -> void:
 				_render_node.transform.origin = _camera_target_smooth_node.transform.origin
 				_render_node.transform.basis = get_global_transform().basis
 				
-			var ik_space : Spatial = _render_node.get_node_or_null("IKSpace")
-			if ik_space:
-				ik_space.update(p_delta)
+			if _ik_space:
+				_ik_space.update(p_delta)
+				
+			entity_node.network_logic_node.set_dirty(true)
 				
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
@@ -133,8 +136,10 @@ func _physics_process(p_delta : float) -> void:
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
-		entity_node = get_entity_node()
-
+		
+		# Node caching
+		_ik_space = _render_node.get_node_or_null("IKSpace")
+		
 		# State machine
 		if !is_entity_master():
 			_state_machine.start_state = NodePath("Networked")

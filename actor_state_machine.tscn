@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://addons/actor/actor_state_machine.gd" type="Script" id=1]
 [ext_resource path="res://addons/actor/states/actor_state_spawned.gd" type="Script" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://addons/actor/states/actor_state_locomotion.gd" type="Script" id=5]
 [ext_resource path="res://addons/actor/states/actor_state_stop.gd" type="Script" id=6]
 [ext_resource path="res://addons/actor/states/actor_state_landed.gd" type="Script" id=7]
+[ext_resource path="res://addons/actor/states/actor_state_networked.gd" type="Script" id=8]
 
 [node name="ActorStateMachine" type="Node"]
 script = ExtResource( 1 )
@@ -29,3 +30,6 @@ script = ExtResource( 4 )
 
 [node name="Stop" type="Node" parent="."]
 script = ExtResource( 6 )
+
+[node name="Networked" type="Node" parent="."]
+script = ExtResource( 8 )

@@ -61,15 +61,17 @@ func move(p_movement : Vector3) -> void:
 func update(p_delta : float) -> void:
 	.update(p_delta)
 	
-func _ready() -> void:
+func start() -> void:
+	.start()
 	if !Engine.is_editor_hint():
 		states_map = {
-			"Spawned": $Spawned,
-			"Idle": $Idle,
-			"Locomotion": $Locomotion,
-			"Falling": $Falling,
-			"Stop": $Stop,
-			"Landed": $Landed
+			"Spawned": get_node_or_null("Spawned"),
+			"Idle": get_node_or_null("Idle"),
+			"Locomotion": get_node_or_null("Locomotion"),
+			"Falling": get_node_or_null("Falling"),
+			"Stop": get_node_or_null("Stop"),
+			"Landed": get_node_or_null("Landed"),
+			"Networked": get_node_or_null("Networked")
 		}
 		
 		actor_controller = get_node(actor_controller_path)

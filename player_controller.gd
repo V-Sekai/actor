@@ -61,14 +61,12 @@ func move(p_target_velocity : Vector3) -> Vector3:
 		origin_offset += frame_offset
 		
 	var move_ret : Vector3 = .move(p_target_velocity + (transformed_frame_offset * physics_fps))
-	#set_global_transform(Transform(get_entity_node().global_transform.basis, _extended_kinematic_body.global_transform.origin))
+	#set_global_transform(Transform(entity_node.global_transform.basis, _extended_kinematic_body.global_transform.origin))
 	return move_ret
 		
 # Automatically sets this entity name to correspond with its unique network ID
 func update_network_player_name() -> void:
-	var entity_node : Node = get_entity_node()
-	if entity_node:
-		entity_node.set_name("Player_" + str(get_network_master()))
+	entity_node.set_name("Player_" + str(get_network_master()))
 		
 func preprocess_master_or_puppet_state() -> void:
 	if is_entity_master():
@@ -123,7 +121,7 @@ func _physics_process(p_delta : float) -> void:
 				master_movement(p_delta) # Restructure this!
 				
 			# There is a slight delay in the movement, but this allows framerate independent movement
-			current_origin = get_entity_node().global_transform.origin
+			current_origin = entity_node.global_transform.origin
 			
 			if _camera_target_node:
 				_camera_target_node.transform.origin = current_origin
@@ -135,10 +133,18 @@ func _physics_process(p_delta : float) -> void:
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
+		entity_node = get_entity_node()
+
+		# State machine
+		if !is_entity_master():
+			_state_machine.start_state = NodePath("Networked")
+		else:
+			_state_machine.start_state = NodePath("Spawned")
+		_state_machine.start()
+		
 		preprocess_master_or_puppet_state()
-		if has_node(_camera_target_node_path):
-			_camera_target_node = get_node(_camera_target_node_path)
-			
+		_camera_target_node = get_node_or_null(_camera_target_node_path)
+		if _camera_target_node:
 			if _camera_target_node == self or not _camera_target_node is Spatial:
 				_camera_target_node = null
 			else:

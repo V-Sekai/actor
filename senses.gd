@@ -16,7 +16,7 @@ func get_actor_eye_transform() -> Transform:
 	#	return get_global_origin() + Transform(Basis(), extended_kinematic_body.up * eye_height)
 	
 func can_see_collider_point(p_point : Vector3, p_exclusion_array : Array = [], p_collision_bits : int = 1) -> bool:
-	var dss : PhysicsDirectSpaceState = _entity_node.PhysicsServer.space_get_direct_state(_entity_node.get_world().get_space())
+	var dss : PhysicsDirectSpaceState = entity_node.PhysicsServer.space_get_direct_state(entity_node.get_world().get_space())
 	if dss:
 		camera_planes = camera_matrix.get_projection_planes(get_actor_eye_transform())
 		
@@ -30,7 +30,7 @@ func can_see_collider_point(p_point : Vector3, p_exclusion_array : Array = [], p
 	return false
 	
 func can_see_collider_aabb(p_aabb : AABB, p_exclusion_array : Array = [], p_collision_bits : int = 1) -> bool:
-	var dss = _entity_node.PhysicsServer.space_get_direct_state(_entity_node.get_world().get_space())
+	var dss = entity_node.PhysicsServer.space_get_direct_state(entity_node.get_world().get_space())
 	if dss:
 		camera_planes = camera_matrix.get_projection_planes(get_actor_eye_transform())
 		

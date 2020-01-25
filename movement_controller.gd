@@ -1,4 +1,4 @@
-extends "res://addons/entity_manager/spatial_logic_node.gd"
+extends "res://addons/entity_manager/spatial_simulation_logic.gd"
 tool
 
 const MAX_SLIDE_ATTEMPTS = 4

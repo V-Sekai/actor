@@ -165,6 +165,7 @@ func _ready() -> void:
 func _entity_ready() -> void:
 	._entity_ready()
 	
+	_player_input.setup_xr_camera()
 	update_network_player_name()
 
 func _on_transform_changed() -> void:

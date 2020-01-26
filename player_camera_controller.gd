@@ -184,3 +184,14 @@ func _ready() -> void:
 	else:
 		set_process(false)
 		set_physics_process(false)
+
+func _enter_tree() -> void:
+	request_ready()
+
+func _exit_tree() -> void:
+	camera = null
+	
+	origin.queue_free()
+	origin.get_parent().remove_child(origin)
+	
+	remove_from_group("camera_controllers")

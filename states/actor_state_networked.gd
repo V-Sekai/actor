@@ -1,11 +1,11 @@
 extends "actor_state.gd"
 
-func enter():
+func enter() -> void:
 	pass
 
-func update(p_delta):
+func update(p_delta : float) -> void:
 	if p_delta > 0.0:
 		pass
 	
-func exit():
+func exit() -> void:
 	pass

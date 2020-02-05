@@ -1,9 +1,9 @@
 extends "actor_state.gd"
 
-func enter():
+func enter() -> void:
 	pass
 
-func update(p_delta):
+func update(p_delta : float) -> void:
 	if p_delta > 0.0:
 		var gravity = state_machine.get_actor_controller().get_gravity()
 		
@@ -13,5 +13,5 @@ func update(p_delta):
 		if state_machine.is_grounded():
 			change_state("Landed")
 
-func exit():
+func exit() -> void:
 	pass

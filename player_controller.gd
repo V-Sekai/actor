@@ -194,3 +194,6 @@ func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
 		
 		# Overall entity rotation
 		set_global_transform(Transform(camera_controller_yaw, get_global_origin()))
+		
+func get_attachment_node(p_attachment_id : int) -> Node:
+	return _render_node

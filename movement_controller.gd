@@ -12,6 +12,24 @@ var _extended_kinematic_body : extended_kinematic_body_const = null setget set_k
 export(NodePath) var _internal_rotation_path : NodePath = NodePath()
 var _internal_rotation : Spatial = null
 
+func set_global_origin(p_origin : Vector3, _p_update_physics : bool = false) -> void:
+	.set_global_origin(p_origin, _p_update_physics)
+	if _p_update_physics:
+		if _extended_kinematic_body:
+			_extended_kinematic_body.set_global_transform(Transform(Basis(), get_global_origin()))
+	
+func set_transform(p_transform : Transform, _p_update_physics : bool = false) -> void:
+	.set_transform(p_transform, _p_update_physics)
+	if _p_update_physics:
+		if _extended_kinematic_body:
+			_extended_kinematic_body.set_global_transform(Transform(Basis(), get_global_origin()))
+		
+func set_global_transform(p_global_transform : Transform, _p_update_physics : bool = false) -> void:
+	.set_global_transform(p_global_transform, _p_update_physics)
+	if _p_update_physics:
+		if _extended_kinematic_body:
+			_extended_kinematic_body.set_global_transform(Transform(Basis(), get_global_origin()))
+
 func set_kinematic_body(p_extended_kinematic_body : extended_kinematic_body_const) -> void:
 	_extended_kinematic_body = p_extended_kinematic_body
 	

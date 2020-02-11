@@ -50,22 +50,23 @@ var _render_node : Spatial = null
 
 #var skeleton = null : Spatial
 
+func cache_nodes() -> void:
+	.cache_nodes()
+	# Render node
+	_render_node = get_node_or_null(_render_node_path)
+	if _render_node == self or not _render_node is Spatial:
+		_render_node = null
+		
+	# State machine node
+	_state_machine = get_node_or_null(_state_machine_path)
+	if _state_machine == self:
+		_state_machine = null
+
 func _ready() -> void:
 	if !Engine.is_editor_hint():
-		# Render node
-		if has_node(_render_node_path):
-			_render_node = get_node(_render_node_path)
-			if _render_node == self or not _render_node is Spatial:
-				_render_node = null
-			else:
-				_render_node.set_as_toplevel(true)
-				_render_node.global_transform = Transform(Basis(), get_global_origin())
-			
-		# State machine node
-		if has_node(_state_machine_path):
-			_state_machine = get_node(_state_machine_path)
-			if _state_machine == self:
-				_state_machine = null
+		if _render_node:
+			_render_node.set_as_toplevel(true)
+			_render_node.global_transform = Transform(Basis(), get_global_origin())
 	else:
 		set_process(false)
 		set_process_internal(false)

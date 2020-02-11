@@ -134,12 +134,14 @@ func _physics_process(p_delta : float) -> void:
 			if !is_entity_master():
 				_extended_kinematic_body.global_transform.origin = get_global_origin()
 
+func cache_nodes() -> void:
+	.cache_nodes()
+	
+	# Node caching
+	_ik_space = _render_node.get_node_or_null("IKSpace")
+
 func _ready() -> void:
 	if !Engine.is_editor_hint():
-		
-		# Node caching
-		_ik_space = _render_node.get_node_or_null("IKSpace")
-		
 		# State machine
 		if !is_entity_master():
 			_state_machine.start_state = NodePath("Networked")

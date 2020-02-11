@@ -63,21 +63,30 @@ func is_grounded() -> bool:
 func _on_transform_changed() -> void:
 	._on_transform_changed()
 	
+func cache_nodes() -> void:
+	.cache_nodes()
+	
+	_extended_kinematic_body = get_node_or_null(_extended_kinematic_body_path)
+
+	if _extended_kinematic_body == self or not _extended_kinematic_body is extended_kinematic_body_const:
+		_extended_kinematic_body = null
+		
+	if _internal_rotation == self or not _internal_rotation is Spatial:
+		_internal_rotation = null
+	else:
+		_internal_rotation.set_as_toplevel(true)
+		_internal_rotation.global_transform = Transform(Basis(), get_global_transform().origin)
+	
 func _ready() -> void:
 	if has_node(_extended_kinematic_body_path):
 		_extended_kinematic_body = get_node(_extended_kinematic_body_path)
 	
-		if _extended_kinematic_body == self or not _extended_kinematic_body is extended_kinematic_body_const:
-			_extended_kinematic_body = null
-		else:
+		if _extended_kinematic_body:
 			# By default, kinematic body is not affected by its parent's movement
 			_extended_kinematic_body.set_as_toplevel(true)
 			_extended_kinematic_body.global_transform = Transform(Basis(), get_global_transform().origin)
-			
-	if has_node(_internal_rotation_path):
-		_internal_rotation = get_node(_internal_rotation_path)
-	
-		if _internal_rotation == self or not _internal_rotation is Spatial:
+
+		if _internal_rotation == null:
 			_internal_rotation = get_entity_node()
 		else:
 			_internal_rotation.set_as_toplevel(true)

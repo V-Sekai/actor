@@ -146,6 +146,7 @@ func _ready() -> void:
 		if !is_entity_master():
 			_state_machine.start_state = NodePath("Networked")
 		else:
+			GroupsNetworkManager.local_player_instance = get_entity_node()
 			_state_machine.start_state = NodePath("Spawned")
 		_state_machine.start()
 		

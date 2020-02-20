@@ -22,6 +22,7 @@ export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
 onready var physics_fps : int = ProjectSettings.get("physics/common/physics_fps")
 
 var _ik_space : Spatial = null
+var _avatar_render : Spatial = null
 
 # The offset between the camera position and ARVROrigin center (none transformed)
 var frame_offset : Vector3 = Vector3()
@@ -93,7 +94,7 @@ func _process(p_delta : float) -> void:
 		if p_delta > 0.0:
 			if is_entity_master():
 				_player_input.update_input(p_delta)
-				_player_input.update_origin(origin_offset)
+				_player_input.update_origin(origin_offset + Vector3(0.0, -_avatar_render.height_offset, 0.0))
 				
 				if _render_node:
 					_player_input.update_head_accumulation()
@@ -139,6 +140,7 @@ func cache_nodes() -> void:
 	
 	# Node caching
 	_ik_space = _render_node.get_node_or_null("IKSpace")
+	_avatar_render = _render_node.get_node_or_null("AvatarRender")
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
@@ -198,5 +200,27 @@ func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
 		# Overall entity rotation
 		set_global_transform(Transform(camera_controller_yaw, get_global_origin()))
 		
+const LEFT_HAND_ID = 0
+const RIGHT_HAND_ID = 1
+		
+func get_attachment_id(p_attachment_name : String) -> int:
+	match p_attachment_name:
+		"LeftHand":
+			return LEFT_HAND_ID
+		"RightHand":
+			return RIGHT_HAND_ID
+		_:
+			return -1
+		
 func get_attachment_node(p_attachment_id : int) -> Node:
-	return _render_node
+	match p_attachment_id:
+		LEFT_HAND_ID:
+			return _avatar_render.left_hand_bone_attachment
+		RIGHT_HAND_ID:
+			return _avatar_render.right_hand_bone_attachment
+		_:
+			return _render_node
+
+func _on_touched_by_body(p_body) -> void:
+	if p_body.has_method("touched_by_body_with_network_id"):
+		p_body.touched_by_body_with_network_id(get_network_master())

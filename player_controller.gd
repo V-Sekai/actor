@@ -140,7 +140,9 @@ func cache_nodes() -> void:
 	
 	# Node caching
 	_ik_space = _render_node.get_node_or_null("IKSpace")
+	
 	_avatar_render = _render_node.get_node_or_null("AvatarRender")
+	_avatar_render.simulation_logic = self
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():

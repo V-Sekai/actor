@@ -160,7 +160,7 @@ func update(p_delta : float) -> void:
 	calculate_internal_rotation(p_delta)
 	calculate_final_transform(p_delta)
 
-func update_origin(p_origin_offset):
+func update_origin(p_origin_offset : Vector3) -> void:
 	origin_offset = p_origin_offset
 	origin.transform = global_transform * Transform(Basis(), -origin_offset)
 

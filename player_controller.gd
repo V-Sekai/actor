@@ -16,6 +16,9 @@ onready var _camera_controller_node : Spatial = get_node(_camera_controller_node
 export(NodePath) var _player_input_path : NodePath = NodePath()
 onready var _player_input : Node = get_node(_player_input_path)
 
+export(NodePath) var _player_pickup_controller_path : NodePath = NodePath()
+var _player_pickup_controller : Node = null
+
 export(int, LAYERS_3D_PHYSICS) var local_player_collision : int = 1
 export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
 
@@ -68,8 +71,8 @@ func move(p_target_velocity : Vector3) -> Vector3:
 	return move_ret
 		
 # Automatically sets this entity name to correspond with its unique network ID
-func update_network_player_name() -> void:
-	entity_node.set_name("Player_" + str(get_network_master()))
+#func update_network_player_name() -> void:
+#	entity_node.set_name("Player_" + str(get_network_master()))
 		
 func preprocess_master_or_puppet_state() -> void:
 	if is_entity_master():
@@ -83,7 +86,7 @@ func preprocess_master_or_puppet_state() -> void:
 		_camera_controller_node.get_parent().remove_child(_camera_controller_node)
 		_camera_controller_node = null
 		
-	update_network_player_name()
+	#update_network_player_name()
 		
 func apply_origin_offset() -> void:
 	var transformed_frame_offset = _player_input.transform_origin_offset(frame_offset)
@@ -139,6 +142,9 @@ func cache_nodes() -> void:
 	.cache_nodes()
 	
 	# Node caching
+	_player_pickup_controller = get_node_or_null(_player_pickup_controller_path)
+	_player_pickup_controller.player_controller = self
+	
 	_ik_space = _render_node.get_node_or_null("IKSpace")
 	
 	_avatar_render = _render_node.get_node_or_null("AvatarRender")
@@ -173,7 +179,7 @@ func _entity_ready() -> void:
 	._entity_ready()
 	
 	_player_input.setup_xr_camera()
-	update_network_player_name()
+	#update_network_player_name()
 
 func _on_transform_changed() -> void:
 	._on_transform_changed()
@@ -201,28 +207,19 @@ func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
 		
 		# Overall entity rotation
 		set_global_transform(Transform(camera_controller_yaw, get_global_origin()))
-		
-const LEFT_HAND_ID = 0
-const RIGHT_HAND_ID = 1
-		
-func get_attachment_id(p_attachment_name : String) -> int:
-	match p_attachment_name:
-		"LeftHand":
-			return LEFT_HAND_ID
-		"RightHand":
-			return RIGHT_HAND_ID
-		_:
-			return -1
-		
-func get_attachment_node(p_attachment_id : int) -> Node:
-	match p_attachment_id:
-		LEFT_HAND_ID:
-			return _avatar_render.left_hand_bone_attachment
-		RIGHT_HAND_ID:
-			return _avatar_render.right_hand_bone_attachment
-		_:
-			return _render_node
 
 func _on_touched_by_body(p_body) -> void:
 	if p_body.has_method("touched_by_body_with_network_id"):
 		p_body.touched_by_body_with_network_id(get_network_master())
+		
+func get_attachment_node(p_attachment_id : int) -> Node:
+	match p_attachment_id:
+		_player_pickup_controller.LEFT_HAND_ID:
+			return _avatar_render.left_hand_bone_attachment
+		_player_pickup_controller.RIGHT_HAND_ID:
+			return _avatar_render.right_hand_bone_attachment
+		_:
+			return _render_node
+		
+func get_player_pickup_controller() -> Node:
+	return _player_pickup_controller

@@ -212,6 +212,10 @@ func _on_touched_by_body(p_body) -> void:
 	if p_body.has_method("touched_by_body_with_network_id"):
 		p_body.touched_by_body_with_network_id(get_network_master())
 		
+func entity_child_pre_remove(p_entity_child : Node) -> void:
+	if _player_pickup_controller:
+		_player_pickup_controller.clear_hand_entity_references_for_entity(p_entity_child)
+		
 func get_attachment_node(p_attachment_id : int) -> Node:
 	match p_attachment_id:
 		_player_pickup_controller.LEFT_HAND_ID:

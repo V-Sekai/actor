@@ -227,3 +227,6 @@ func get_attachment_node(p_attachment_id : int) -> Node:
 		
 func get_player_pickup_controller() -> Node:
 	return _player_pickup_controller
+	
+func get_avatar_render() -> Spatial:
+	return _avatar_render

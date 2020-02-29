@@ -230,3 +230,6 @@ func get_player_pickup_controller() -> Node:
 	
 func get_avatar_render() -> Spatial:
 	return _avatar_render
+	
+func _threaded_instance_post_setup() -> void:
+	get_avatar_render().load_model()

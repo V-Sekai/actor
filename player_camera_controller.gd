@@ -170,21 +170,25 @@ func _ready() -> void:
 			set_target(get_node(target_path))
 		if has_node(kinematic_player_controller_path):
 			set_kinematic_player_controller(get_node(kinematic_player_controller_path))
-		
-		origin = player_origin_const.instance()
-		GroupsGameFlowManager.gameroot.add_child(origin)
-		origin.set_as_toplevel(true)
-		update_origin(origin_offset)
-		
-		camera = origin.get_node_or_null("ARVRCamera")
-		if camera:
-			camera.set_current(true)
 	else:
 		set_process(false)
 		set_physics_process(false)
 
+func setup_origin() -> void:
+	if is_network_master():
+		if !origin:
+			origin = player_origin_const.instance()
+			GroupsGameFlowManager.gameroot.add_child(origin)
+			origin.set_as_toplevel(true)
+			update_origin(origin_offset)
+		
+			camera = origin.get_node_or_null("ARVRCamera")
+			if camera:
+				camera.set_current(true)
+
 func _enter_tree() -> void:
 	add_to_group("camera_controllers")
+	setup_origin()
 	request_ready()
 
 func _exit_tree() -> void:

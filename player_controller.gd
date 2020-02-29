@@ -156,6 +156,7 @@ func _ready() -> void:
 		if !is_entity_master():
 			_state_machine.start_state = NodePath("Networked")
 		else:
+			_player_input.setup_xr_camera()
 			GroupsNetworkManager.local_player_instance = get_entity_node()
 			_state_machine.start_state = NodePath("Spawned")
 		_state_machine.start()
@@ -174,12 +175,6 @@ func _ready() -> void:
 				_camera_target_node.global_transform = Transform(Basis(), current_origin)
 				_camera_target_smooth_node.global_transform = _camera_target_node.global_transform
 			_camera_target_smooth_node.teleport()
-
-func _entity_ready() -> void:
-	._entity_ready()
-	
-	_player_input.setup_xr_camera()
-	#update_network_player_name()
 
 func _on_transform_changed() -> void:
 	._on_transform_changed()

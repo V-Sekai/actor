@@ -63,11 +63,7 @@ func cache_nodes() -> void:
 		_state_machine = null
 
 func _ready() -> void:
-	if !Engine.is_editor_hint():
-		if _render_node:
-			_render_node.set_as_toplevel(true)
-			_render_node.global_transform = Transform(Basis(), get_global_origin())
-	else:
+	if Engine.is_editor_hint():
 		set_process(false)
 		set_process_internal(false)
 		set_physics_process(false)

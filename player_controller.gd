@@ -4,11 +4,11 @@ extends "actor_controller.gd"
 const player_camera_controller_const = preload("res://addons/actor/player_camera_controller.gd")
 const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")
 
-export(NodePath) var _camera_target_node_path : NodePath = NodePath()
-onready var _camera_target_node : Spatial = get_node(_camera_target_node_path)
+export(NodePath) var _target_node_path : NodePath = NodePath()
+onready var _target_node : Spatial = get_node(_target_node_path)
 
-export(NodePath) var _camera_target_smooth_node_path : NodePath = NodePath()
-onready var _camera_target_smooth_node : Spatial = get_node(_camera_target_smooth_node_path)
+export(NodePath) var _target_smooth_node_path : NodePath = NodePath()
+onready var _target_smooth_node : Spatial = get_node(_target_smooth_node_path)
 
 export(NodePath) var _camera_controller_node_path : NodePath = NodePath()
 onready var _camera_controller_node : Spatial = get_node(_camera_controller_node_path)
@@ -88,10 +88,6 @@ func preprocess_master_or_puppet_state() -> void:
 		
 	#update_network_player_name()
 		
-func apply_origin_offset() -> void:
-	var transformed_frame_offset = _player_input.transform_origin_offset(frame_offset)
-	_camera_target_smooth_node.add_offset(transformed_frame_offset)
-		
 func _process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
 		if p_delta > 0.0:
@@ -100,18 +96,16 @@ func _process(p_delta : float) -> void:
 				_player_input.update_origin(origin_offset + Vector3(0.0, -_avatar_render.height_offset, 0.0))
 				
 				if _render_node:
-					_player_input.update_head_accumulation()
 					var camera_offset : Vector3 = _player_input.transform_origin_offset(_player_input.get_head_accumulator())
-					_render_node.transform.origin = _camera_target_smooth_node.transform.origin + camera_offset
-					_render_node.transform.basis = get_global_transform().basis
+					_render_node.transform.basis = get_transform().basis
 			else:
-				_render_node.transform.origin = _camera_target_smooth_node.transform.origin
-				_render_node.transform.basis = get_global_transform().basis
-				
-			if _ik_space:
-				_ik_space.update(p_delta)
+				_render_node.transform.basis = get_transform().basis
 				
 			entity_node.network_logic_node.set_dirty(true)
+				
+func _on_target_smooth_transform_complete(p_delta) -> void:
+	if _ik_space:
+		_ik_space.update(p_delta)
 				
 func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
@@ -130,10 +124,8 @@ func _physics_process(p_delta : float) -> void:
 			# There is a slight delay in the movement, but this allows framerate independent movement
 			current_origin = entity_node.global_transform.origin
 			
-			if _camera_target_node:
-				_camera_target_node.transform.origin = current_origin
-				if is_entity_master():
-					apply_origin_offset()
+			if _target_node:
+				_target_node.transform.origin = current_origin
 				
 			if !is_entity_master():
 				_extended_kinematic_body.global_transform.origin = get_global_origin()
@@ -162,28 +154,27 @@ func _ready() -> void:
 		_state_machine.start()
 		
 		preprocess_master_or_puppet_state()
-		_camera_target_node = get_node_or_null(_camera_target_node_path)
-		if _camera_target_node:
-			if _camera_target_node == self or not _camera_target_node is Spatial:
-				_camera_target_node = null
+		_target_node = get_node_or_null(_target_node_path)
+		if _target_node:
+			if _target_node == self or not _target_node is Spatial:
+				_target_node = null
 			else:
 				# By default, kinematic body is not affected by its parent's movement
-				_camera_target_node.set_as_toplevel(true)
-				_camera_target_smooth_node.set_as_toplevel(true)
+				_target_node.set_as_toplevel(true)
+				_target_smooth_node.set_as_toplevel(true)
 				
 				current_origin = get_global_transform().origin
-				_camera_target_node.global_transform = Transform(Basis(), current_origin)
-				_camera_target_smooth_node.global_transform = _camera_target_node.global_transform
-			_camera_target_smooth_node.teleport()
+				_target_node.global_transform = Transform(Basis(), current_origin)
+				_target_smooth_node.global_transform = _target_node.global_transform
+			_target_smooth_node.teleport()
 
 func _on_transform_changed() -> void:
 	._on_transform_changed()
 	
 	# Update the camera
 	if _camera_controller_node:
-		if _camera_controller_node.camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
-			var m : Basis = controller_helpers_const.get_absolute_basis(get_global_transform().basis)
-			_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y)
+		var m : Basis = controller_helpers_const.get_absolute_basis(get_global_transform().basis)
+		_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y)
 	
 func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
 	if p_camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:

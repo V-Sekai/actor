@@ -214,8 +214,5 @@ func get_attachment_node(p_attachment_id : int) -> Node:
 func get_player_pickup_controller() -> Node:
 	return _player_pickup_controller
 	
-func get_avatar_render() -> Spatial:
-	return _avatar_render
-	
 func _threaded_instance_post_setup() -> void:
-	get_avatar_render().load_model()
+	_avatar_render.load_model()

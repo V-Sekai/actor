@@ -74,4 +74,4 @@ func start() -> void:
 			"Networked": get_node_or_null("Networked")
 		}
 		
-		actor_controller = get_node(actor_controller_path)
+		actor_controller = get_node_or_null(actor_controller_path)

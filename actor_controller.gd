@@ -8,7 +8,7 @@ var _state_machine : state_machine_const = null
 
 # Render
 export(NodePath) var _third_person_render_node_path : NodePath = NodePath()
-onready var _third_person_render_node : Node = get_node(_third_person_render_node_path)
+onready var _third_person_render_node : Node = get_node_or_null(_third_person_render_node_path)
 
 # Vector fed into the kinematic movement
 var move_vector : Vector3 = Vector3() setget set_move_vector, get_move_vector

@@ -67,13 +67,13 @@ func cache_nodes() -> void:
 	.cache_nodes()
 	
 	if has_node(_extended_kinematic_body_path):
-		_extended_kinematic_body = get_node(_extended_kinematic_body_path)
+		_extended_kinematic_body = get_node_or_null(_extended_kinematic_body_path)
 	
 		if _extended_kinematic_body == self or not _extended_kinematic_body is extended_kinematic_body_const:
 			_extended_kinematic_body = null
 			
 	if has_node(_internal_rotation_path):
-		_internal_rotation = get_node(_internal_rotation_path)
+		_internal_rotation = get_node_or_null(_internal_rotation_path)
 	
 		if _internal_rotation == self or not _internal_rotation is Spatial:
 			_internal_rotation = get_entity_node()

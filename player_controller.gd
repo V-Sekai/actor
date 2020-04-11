@@ -5,16 +5,16 @@ const player_camera_controller_const = preload("res://addons/actor/player_camera
 const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")
 
 export(NodePath) var _target_node_path : NodePath = NodePath()
-onready var _target_node : Spatial = get_node(_target_node_path)
+onready var _target_node : Spatial = get_node_or_null(_target_node_path)
 
 export(NodePath) var _target_smooth_node_path : NodePath = NodePath()
-onready var _target_smooth_node : Spatial = get_node(_target_smooth_node_path)
+onready var _target_smooth_node : Spatial = get_node_or_null(_target_smooth_node_path)
 
 export(NodePath) var _camera_controller_node_path : NodePath = NodePath()
-onready var _camera_controller_node : Spatial = get_node(_camera_controller_node_path)
+onready var _camera_controller_node : Spatial = get_node_or_null(_camera_controller_node_path)
 
 export(NodePath) var _player_input_path : NodePath = NodePath()
-onready var _player_input : Node = get_node(_player_input_path)
+onready var _player_input : Node = get_node_or_null(_player_input_path)
 
 export(NodePath) var _player_pickup_controller_path : NodePath = NodePath()
 var _player_pickup_controller : Node = null

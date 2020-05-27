@@ -35,6 +35,10 @@ var origin_offset : Vector3 = Vector3()
 var current_origin : Vector3 = Vector3()
 var can_move : bool = true
 	
+# Teleport
+var teleport_flag : bool = false
+var teleport_transform : Transform = Transform()
+	
 func client_movement(p_delta : float) -> void:
 	if p_delta > 0.0:
 		if is_entity_master():
@@ -111,6 +115,9 @@ func _physics_process(p_delta : float) -> void:
 	if !Engine.is_editor_hint():
 		if p_delta > 0.0:
 			if is_entity_master():
+				if teleport_flag:
+					teleport_to(teleport_transform)
+				
 				_player_input.update_head_accumulation()
 				_player_input.update_input(p_delta)
 			
@@ -129,6 +136,10 @@ func _physics_process(p_delta : float) -> void:
 				
 			if !is_entity_master():
 				_extended_kinematic_body.global_transform.origin = get_global_origin()
+				
+			if teleport_flag:
+				_target_smooth_node.teleport()
+				teleport_flag = false
 
 func cache_nodes() -> void:
 	.cache_nodes()
@@ -210,6 +221,13 @@ func get_attachment_node(p_attachment_id : int) -> Node:
 			return _avatar_render.right_hand_bone_attachment
 		_:
 			return _render_node
+
+func schedule_teleport(p_transform : Transform) -> void:
+	teleport_transform = p_transform
+	teleport_flag = true
+		
+func teleport_to(p_transform : Transform) -> void:
+	.teleport_to(p_transform)
 		
 func get_player_pickup_controller() -> Node:
 	return _player_pickup_controller

@@ -3,7 +3,7 @@ tool
 
 const MAX_SLIDE_ATTEMPTS = 4
 
-const controller_helpers_const = preload("res://addons/actor/controller_helpers.gd")
+const controller_helpers_const = preload("controller_helpers.gd")
 
 const extended_kinematic_body_const = preload("res://addons/extended_kinematic_body/extended_kinematic_body.gd")
 export(NodePath) var _extended_kinematic_body_path : NodePath = NodePath()

@@ -1,7 +1,7 @@
 extends "actor_controller.gd"
 
 # Consts
-const player_camera_controller_const = preload("res://addons/actor/player_camera_controller.gd")
+const player_camera_controller_const = preload("player_camera_controller.gd")
 const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")
 
 export(NodePath) var _target_node_path : NodePath = NodePath()
@@ -25,7 +25,7 @@ export(int, LAYERS_3D_PHYSICS) var other_player_collision : int = 1
 onready var physics_fps : int = ProjectSettings.get("physics/common/physics_fps")
 
 var _ik_space : Spatial = null
-var _avatar_render : Spatial = null
+var _avatar_display : Spatial = null
 
 # The offset between the camera position and ARVROrigin center (none transformed)
 var frame_offset : Vector3 = Vector3()
@@ -97,7 +97,7 @@ func _process(p_delta : float) -> void:
 		if p_delta > 0.0:
 			if is_entity_master():
 				_player_input.update_input(p_delta)
-				_player_input.update_origin(origin_offset + Vector3(0.0, -_avatar_render.height_offset, 0.0))
+				_player_input.update_origin(origin_offset + Vector3(0.0, -_avatar_display.height_offset, 0.0))
 				
 				if _render_node:
 					var camera_offset : Vector3 = _player_input.transform_origin_offset(_player_input.get_head_accumulator())
@@ -150,8 +150,8 @@ func cache_nodes() -> void:
 	
 	_ik_space = _render_node.get_node_or_null("IKSpace")
 	
-	_avatar_render = _render_node.get_node_or_null("AvatarRender")
-	_avatar_render.simulation_logic = self
+	_avatar_display = _render_node.get_node_or_null("AvatarDisplay")
+	_avatar_display.simulation_logic = self
 
 func _ready() -> void:
 	if !Engine.is_editor_hint():
@@ -176,7 +176,7 @@ func _ready() -> void:
 				
 				current_origin = get_global_transform().origin
 				_target_node.global_transform = Transform(Basis(), current_origin)
-				_target_smooth_node.global_transform = _target_node.global_transform
+				#_target_smooth_node.global_transform = _target_node.global_transform
 			_target_smooth_node.teleport()
 
 func _on_transform_changed() -> void:
@@ -216,9 +216,9 @@ func entity_child_pre_remove(p_entity_child : Node) -> void:
 func get_attachment_node(p_attachment_id : int) -> Node:
 	match p_attachment_id:
 		_player_pickup_controller.LEFT_HAND_ID:
-			return _avatar_render.left_hand_bone_attachment
+			return _avatar_display.left_hand_bone_attachment
 		_player_pickup_controller.RIGHT_HAND_ID:
-			return _avatar_render.right_hand_bone_attachment
+			return _avatar_display.right_hand_bone_attachment
 		_:
 			return _render_node
 
@@ -233,4 +233,4 @@ func get_player_pickup_controller() -> Node:
 	return _player_pickup_controller
 	
 func _threaded_instance_post_setup() -> void:
-	_avatar_render.load_model()
+	_avatar_display.load_model()

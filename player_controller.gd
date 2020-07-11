@@ -160,7 +160,8 @@ func _ready() -> void:
 			_state_machine.start_state = NodePath("Networked")
 		else:
 			_player_input.setup_xr_camera()
-			GroupsNetworkManager.local_player_instance = get_entity_node()
+			# TODO: remove direct call to VSKNetworkManager
+			VSKNetworkManager.local_player_instance = get_entity_node()
 			_state_machine.start_state = NodePath("Spawned")
 		_state_machine.start()
 		

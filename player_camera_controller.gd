@@ -27,7 +27,6 @@ signal internal_rotation_updated(p_camera_type)
 
 func calculate_internal_rotation(p_delta : float) -> void:
 	if is_active and p_delta > 0.0:
-		
 		rotation_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
 		emit_signal("internal_rotation_updated", CAMERA_FIRST_PERSON)
 
@@ -36,13 +35,14 @@ func update(p_delta : float) -> void:
 	
 	transform.basis = Basis.rotated(Vector3(0.0, -1.0, 0.0), deg2rad(rotation_yaw))
 	
-	if VRManager.xr_active == false:
+	if camera and VRManager.xr_active == false:
 		camera.transform.origin = Vector3(0.0, 1.0, 0.0) * camera_height
 		camera.transform.basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), deg2rad(rotation_pitch))
 
 func update_origin(p_origin_offset : Vector3) -> void:
 	origin_offset = p_origin_offset
-	origin.transform = Transform(Basis(), -origin_offset)
+	if origin:
+		origin.transform = Transform(Basis(), -origin_offset)
 
 func _ready() -> void:
 	if Engine.is_editor_hint():

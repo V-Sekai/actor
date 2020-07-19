@@ -189,19 +189,20 @@ func _on_transform_changed() -> void:
 		_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y)
 	
 func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
-	if p_camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
+	if _camera_controller_node and p_camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
 		var camera_controller_yaw = Basis().rotated(Vector3(0, 1, 0), deg2rad(-_camera_controller_node.rotation_yaw))
 		
-		# Movement directions are relative to this. (TODO: refactor)
-		match VRManager.movement_orientation:
-			vr_manager_const.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
-				_internal_rotation.set_global_transform(Transform(_camera_controller_node.camera.global_transform.basis, get_global_origin()))
-			vr_manager_const.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
-				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
-			vr_manager_const.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
-				_internal_rotation.set_global_transform(Transform(_camera_controller_node.origin.get_controller_direction(), get_global_origin()))
-			_:
-				_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
+		if _camera_controller_node.camera:
+			# Movement directions are relative to this. (TODO: refactor)
+			match VRManager.movement_orientation:
+				vr_manager_const.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
+					_internal_rotation.set_global_transform(Transform(_camera_controller_node.camera.global_transform.basis, get_global_origin()))
+				vr_manager_const.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
+					_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
+				vr_manager_const.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
+					_internal_rotation.set_global_transform(Transform(_camera_controller_node.origin.get_controller_direction(), get_global_origin()))
+				_:
+					_internal_rotation.set_global_transform(Transform(_camera_controller_node.transform.basis, get_global_origin()))
 		
 		# Overall entity rotation
 		set_global_transform(Transform(camera_controller_yaw, get_global_origin()))

@@ -76,7 +76,7 @@ func move(p_target_velocity : Vector3) -> Vector3:
 		
 # Automatically sets this entity name to correspond with its unique network ID
 #func update_network_player_name() -> void:
-#	entity_node.set_name("Player_" + str(get_network_master()))
+#	entity_node.set_name("Player_%s" % str(get_network_master()))
 		
 func preprocess_master_or_puppet_state() -> void:
 	if is_entity_master():

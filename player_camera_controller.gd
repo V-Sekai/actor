@@ -35,7 +35,7 @@ func update(p_delta : float) -> void:
 	
 	transform.basis = Basis.rotated(Vector3(0.0, -1.0, 0.0), deg2rad(rotation_yaw))
 	
-	if camera and VRManager.xr_active == false:
+	if camera and !VRManager.xr_active:
 		camera.transform.origin = Vector3(0.0, 1.0, 0.0) * camera_height
 		camera.transform.basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), deg2rad(rotation_pitch))
 

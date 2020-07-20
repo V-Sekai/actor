@@ -5,7 +5,7 @@ func enter() -> void:
 
 func update(p_delta : float) -> void:
 	if p_delta > 0.0:
-		if state_machine.is_grounded() == false:
+		if !state_machine.is_grounded():
 			change_state("Falling")
 			return
 			
@@ -15,7 +15,7 @@ func update(p_delta : float) -> void:
 		state_machine.set_move_vector(state_machine.get_direction_vector() * state_machine.actor_controller.walk_speed * state_machine.get_input_magnitude())
 		state_machine.move(state_machine.get_move_vector())
 		
-		if state_machine.is_attempting_movement() == false:
+		if !state_machine.is_attempting_movement():
 			change_state("Stop")
 			return
 		else:

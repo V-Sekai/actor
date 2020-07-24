@@ -179,6 +179,9 @@ func _ready() -> void:
 				_target_node.global_transform = Transform(Basis(), current_origin)
 				#_target_smooth_node.global_transform = _target_node.global_transform
 			_target_smooth_node.teleport()
+	
+	# Set the camera controller's initial rotation to be that of entity's rotation
+	_on_transform_changed()
 
 func _on_transform_changed() -> void:
 	._on_transform_changed()
@@ -186,11 +189,11 @@ func _on_transform_changed() -> void:
 	# Update the camera
 	if _camera_controller_node:
 		var m : Basis = controller_helpers_const.get_absolute_basis(get_global_transform().basis)
-		_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y)
+		_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y - deg2rad(180))
 	
 func _on_camera_internal_rotation_updated(p_camera_type : int) -> void:
 	if _camera_controller_node and p_camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON:
-		var camera_controller_yaw = Basis().rotated(Vector3(0, 1, 0), deg2rad(-_camera_controller_node.rotation_yaw))
+		var camera_controller_yaw = Basis().rotated(Vector3(0, 1, 0), deg2rad(-_camera_controller_node.rotation_yaw - 180))
 		
 		if _camera_controller_node.camera:
 			# Movement directions are relative to this. (TODO: refactor)

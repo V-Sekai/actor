@@ -178,8 +178,13 @@ func _ready() -> void:
 			_state_machine.start_state = NodePath("Networked")
 		else:
 			_player_input.setup_xr_camera()
-			# TODO: remove direct call to VSKNetworkManager
-			VSKNetworkManager.local_player_instance = get_entity_node()
+			
+			# Teleport callback
+			var teleport:Spatial = VRManager.xr_origin.get_component_by_name("TeleportComponent")
+			if teleport:
+				teleport.assign_can_teleport_funcref(self, "_can_teleport")
+				teleport.assign_teleport_callback_funcref(self, "_schedule_teleport")
+				
 			_state_machine.start_state = NodePath("Spawned")
 		_state_machine.start()
 
@@ -270,7 +275,10 @@ func get_attachment_node(p_attachment_id: int) -> Node:
 			return _render_node
 
 
-func schedule_teleport(p_transform: Transform) -> void:
+func _can_teleport() -> bool:
+	return true
+
+func _schedule_teleport(p_transform: Transform) -> void:
 	teleport_transform = p_transform
 	teleport_flag = true
 

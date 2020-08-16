@@ -227,19 +227,19 @@ func _on_camera_internal_rotation_updated(p_camera_type: int) -> void:
 
 		if _camera_controller_node.camera:
 			# Movement directions are relative to this. (TODO: refactor)
-			match VRManager.movement_orientation:
-				vr_manager_const.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
+			match VRManager.vr_user_preferences.movement_orientation:
+				VRManager.vr_user_preferences.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
 					_internal_rotation.set_global_transform(
 						Transform(
 							_camera_controller_node.camera.global_transform.basis,
 							get_global_origin()
 						)
 					)
-				vr_manager_const.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
+				VRManager.vr_user_preferences.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
 					_internal_rotation.set_global_transform(
 						Transform(_camera_controller_node.transform.basis, get_global_origin())
 					)
-				vr_manager_const.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
+				VRManager.vr_user_preferences.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
 					_internal_rotation.set_global_transform(
 						Transform(
 							_camera_controller_node.origin.get_controller_direction(),

@@ -213,7 +213,7 @@ func _on_transform_changed() -> void:
 	# Update the camera
 	if _camera_controller_node:
 		var m: Basis = controller_helpers_const.get_absolute_basis(get_global_transform().basis)
-		_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y - deg2rad(180))
+		_camera_controller_node.rotation_yaw = rad2deg(-m.get_euler().y - PI)
 
 
 func _on_camera_internal_rotation_updated(p_camera_type: int) -> void:

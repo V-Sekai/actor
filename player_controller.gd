@@ -127,37 +127,6 @@ func _on_target_smooth_transform_complete(p_delta) -> void:
 		_ik_space.update(p_delta)
 
 
-func _physics_process(p_delta: float) -> void:
-	if ! Engine.is_editor_hint():
-		if p_delta > 0.0:
-			if is_entity_master():
-				if teleport_flag:
-					teleport_to(teleport_transform)
-
-				_player_input.update_head_accumulation()
-				_player_input.update_input(p_delta)
-
-			_player_input.input_direction = Vector2(0.0, 0.0)
-			_player_input.input_magnitude = 0.0
-
-			if is_entity_master():
-				client_movement(p_delta)
-				master_movement(p_delta)  # Restructure this!
-
-			# There is a slight delay in the movement, but this allows framerate independent movement
-			current_origin = entity_node.global_transform.origin
-
-			if _target_node:
-				_target_node.transform.origin = current_origin
-
-			if ! is_entity_master():
-				_extended_kinematic_body.global_transform.origin = get_global_origin()
-
-			if teleport_flag:
-				_target_smooth_node.teleport()
-				teleport_flag = false
-
-
 func cache_nodes() -> void:
 	.cache_nodes()
 
@@ -169,42 +138,6 @@ func cache_nodes() -> void:
 
 	_avatar_display = _render_node.get_node_or_null("AvatarDisplay")
 	_avatar_display.simulation_logic = self
-
-
-func _ready() -> void:
-	if ! Engine.is_editor_hint():
-		# State machine
-		if ! is_entity_master():
-			_state_machine.start_state = NodePath("Networked")
-		else:
-			_player_input.setup_xr_camera()
-			
-			# Teleport callback
-			var teleport:Spatial = VRManager.xr_origin.get_component_by_name("TeleportComponent")
-			if teleport:
-				teleport.assign_can_teleport_funcref(self, "_can_teleport")
-				teleport.assign_teleport_callback_funcref(self, "_schedule_teleport")
-				
-			_state_machine.start_state = NodePath("Spawned")
-		_state_machine.start()
-
-		preprocess_master_or_puppet_state()
-		_target_node = get_node_or_null(_target_node_path)
-		if _target_node:
-			if _target_node == self or not _target_node is Spatial:
-				_target_node = null
-			else:
-				# By default, kinematic body is not affected by its parent's movement
-				_target_node.set_as_toplevel(true)
-				_target_smooth_node.set_as_toplevel(true)
-
-				current_origin = get_global_transform().origin
-				_target_node.global_transform = Transform(Basis(), current_origin)
-				#_target_smooth_node.global_transform = _target_node.global_transform
-			_target_smooth_node.teleport()
-
-	# Set the camera controller's initial rotation to be that of entity's rotation
-	_on_transform_changed()
 
 
 func _on_transform_changed() -> void:
@@ -293,3 +226,76 @@ func get_player_pickup_controller() -> Node:
 
 func _threaded_instance_post_setup() -> void:
 	_avatar_display.load_model()
+
+
+func _physics_process(p_delta: float) -> void:
+	if ! Engine.is_editor_hint():
+		if p_delta > 0.0:
+			if is_entity_master():
+				if teleport_flag:
+					teleport_to(teleport_transform)
+
+				_player_input.update_head_accumulation()
+				_player_input.update_input(p_delta)
+
+			_player_input.input_direction = Vector2(0.0, 0.0)
+			_player_input.input_magnitude = 0.0
+
+			if is_entity_master():
+				client_movement(p_delta)
+				master_movement(p_delta)  # Restructure this!
+
+			# There is a slight delay in the movement, but this allows framerate independent movement
+			current_origin = entity_node.global_transform.origin
+
+			if _target_node:
+				_target_node.transform.origin = current_origin
+
+			if ! is_entity_master():
+				_extended_kinematic_body.global_transform.origin = get_global_origin()
+
+			if teleport_flag:
+				_target_smooth_node.teleport()
+				teleport_flag = false
+
+func _ready() -> void:
+	if ! Engine.is_editor_hint():
+		# Callback for when the first packet is received. If this entity is not
+		# owned by the player, wait for the first packet to be received
+		if ! is_entity_master():
+			_render_node.hide()
+			if get_entity_node().network_logic_node:
+				_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT)
+			
+		# State machine
+		if ! is_entity_master():
+			_state_machine.start_state = NodePath("Networked")
+		else:
+			_player_input.setup_xr_camera()
+			
+			# Teleport callback
+			var teleport:Spatial = VRManager.xr_origin.get_component_by_name("TeleportComponent")
+			if teleport:
+				teleport.assign_can_teleport_funcref(self, "_can_teleport")
+				teleport.assign_teleport_callback_funcref(self, "_schedule_teleport")
+				
+			_state_machine.start_state = NodePath("Spawned")
+		_state_machine.start()
+
+		preprocess_master_or_puppet_state()
+		_target_node = get_node_or_null(_target_node_path)
+		if _target_node:
+			if _target_node == self or not _target_node is Spatial:
+				_target_node = null
+			else:
+				# By default, kinematic body is not affected by its parent's movement
+				_target_node.set_as_toplevel(true)
+				_target_smooth_node.set_as_toplevel(true)
+
+				current_origin = get_global_transform().origin
+				_target_node.global_transform = Transform(Basis(), current_origin)
+				#_target_smooth_node.global_transform = _target_node.global_transform
+			_target_smooth_node.teleport()
+
+	# Set the camera controller's initial rotation to be that of entity's rotation
+	_on_transform_changed()

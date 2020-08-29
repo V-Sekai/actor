@@ -1,7 +1,7 @@
 extends Spatial
 tool
 
-const player_origin_const = preload("res://assets/scenes/player_origin.tscn")
+const player_origin_const = preload("player_origin.tscn")
 
 var origin: Spatial = null
 var camera: Camera = null

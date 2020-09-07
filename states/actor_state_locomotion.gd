@@ -11,9 +11,9 @@ func update(p_delta: float) -> void:
 			change_state("Falling")
 			return
 
-		var input_direction: Vector2 = state_machine.get_input_direction()
+		var input_direction: Vector3 = state_machine.get_input_direction()
 
-		state_machine.set_direction_vector(Vector3(input_direction.x, 0.0, input_direction.y))
+		state_machine.set_direction_vector(input_direction)
 		state_machine.set_move_vector(
 			(
 				state_machine.get_direction_vector()

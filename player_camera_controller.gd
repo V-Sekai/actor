@@ -14,11 +14,11 @@ enum { CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON }
 var camera_height: float = 0
 
 # Rotation
-var rotation_yaw: float = 0.0
-var rotation_pitch: float = 0.0
+var rotation_yaw: float = 0.0 # radians
+var rotation_pitch: float = 0.0 # radians
 
-var rotation_pitch_min: float = -89.5
-var rotation_pitch_max: float = 89.5
+var rotation_pitch_min: float = deg2rad(-89.5)
+var rotation_pitch_max: float = deg2rad(89.5)
 
 var origin_offset: Vector3 = Vector3()
 
@@ -34,23 +34,17 @@ func calculate_internal_rotation(p_delta: float) -> void:
 func update(p_delta: float) -> void:
 	calculate_internal_rotation(p_delta)
 
-	transform.basis = Basis.rotated(Vector3(0.0, -1.0, 0.0), deg2rad(rotation_yaw))
+	transform.basis = Basis.rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw - PI)
 
 	if camera and ! VRManager.is_xr_active():
 		camera.transform.origin = Vector3(0.0, 1.0, 0.0) * camera_height
-		camera.transform.basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), deg2rad(rotation_pitch))
+		camera.transform.basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), rotation_pitch)
 
 
 func update_origin(p_origin_offset: Vector3) -> void:
 	origin_offset = p_origin_offset
 	if origin:
 		origin.transform = Transform(Basis(), -origin_offset)
-
-
-func _ready() -> void:
-	if Engine.is_editor_hint():
-		set_process(false)
-		set_physics_process(false)
 
 
 func setup_origin() -> void:
@@ -68,8 +62,6 @@ func setup_origin() -> void:
 func _enter_tree() -> void:
 	add_to_group("camera_controllers")
 	setup_origin()
-	request_ready()
-
 
 func _exit_tree() -> void:
 	camera = null

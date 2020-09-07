@@ -34,3 +34,4 @@ mesh = SubResource( 1 )
 material/0 = SubResource( 2 )
 
 [node name="GizmoReference" parent="." instance=ExtResource( 3 )]
+visible = false

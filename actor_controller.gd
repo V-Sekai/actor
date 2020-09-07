@@ -75,17 +75,6 @@ func cache_nodes() -> void:
 		_state_machine = null
 
 
-func _ready() -> void:
-	if Engine.is_editor_hint():
-		set_process(false)
-		set_process_internal(false)
-		set_physics_process(false)
-		set_physics_process_internal(false)
-		set_process_input(false)
-		set_process_unhandled_key_input(false)
-		set_process_unhandled_input(false)
-
-
 func get_gravity() -> float:
 	return -9.8 * 3
 

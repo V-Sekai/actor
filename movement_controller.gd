@@ -9,9 +9,6 @@ const extended_kinematic_body_const = preload("res://addons/extended_kinematic_b
 export (NodePath) var _extended_kinematic_body_path: NodePath = NodePath()
 var _extended_kinematic_body: extended_kinematic_body_const = null setget set_kinematic_body, get_kinematic_body
 
-export (NodePath) var _internal_rotation_path: NodePath = NodePath()
-var _internal_rotation: Spatial = null
-
 
 func set_global_origin(p_origin: Vector3, _p_update_physics: bool = false) -> void:
 	.set_global_origin(p_origin, _p_update_physics)
@@ -96,12 +93,6 @@ func cache_nodes() -> void:
 		):
 			_extended_kinematic_body = null
 
-	if has_node(_internal_rotation_path):
-		_internal_rotation = get_node_or_null(_internal_rotation_path)
-
-		if _internal_rotation == self or not _internal_rotation is Spatial:
-			_internal_rotation = get_entity_node()
-
 
 func _ready() -> void:
 	if _extended_kinematic_body:
@@ -109,7 +100,3 @@ func _ready() -> void:
 		_extended_kinematic_body.global_transform = Transform(
 			Basis(), get_global_transform().origin
 		)
-
-	if _internal_rotation:
-		_internal_rotation.set_as_toplevel(true)
-		_internal_rotation.global_transform = Transform(Basis(), get_global_transform().origin)

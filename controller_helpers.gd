@@ -24,7 +24,7 @@ static func get_spatial_relative_movement_velocity(p_spatial: Spatial, p_input_d
 
 	if p_spatial:
 		# Get the camera rotation
-		var m: Basis = get_absolute_basis(p_spatial.global_transform.basis)
+		var m: Basis = p_spatial.transform.basis
 
 		var camera_yaw: float = m.get_euler().y  # Radians	
 		var spatial_normal: Vector3 = convert_euler_to_normal(Vector3(0.0, camera_yaw, 0.0))

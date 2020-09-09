@@ -220,7 +220,7 @@ func _entity_physics_process(p_delta: float) -> void:
 	if entity_node.get_entity_parent():
 		current_origin = entity_node.global_transform.origin
 	else:
-		current_origin = entity_node.global_transform.origin
+		current_origin = entity_node.transform.origin
 
 	if _target_node:
 		_target_node.transform.origin = current_origin

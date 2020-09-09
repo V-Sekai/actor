@@ -5,9 +5,8 @@ func enter() -> void:
 	change_state("Idle")
 
 
-func update(p_delta: float) -> void:
-	if p_delta > 0.0:
-		pass
+func update(_delta: float) -> void:
+	pass
 
 
 func exit() -> void:

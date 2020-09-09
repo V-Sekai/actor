@@ -24,21 +24,17 @@ var origin_offset: Vector3 = Vector3()
 
 signal internal_rotation_updated(p_camera_type)
 
-
-func calculate_internal_rotation(p_delta: float) -> void:
+func update(p_delta: float) -> void:
 	if is_active and p_delta > 0.0:
 		rotation_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
-		emit_signal("internal_rotation_updated", CAMERA_FIRST_PERSON)
-
-
-func update(p_delta: float) -> void:
-	calculate_internal_rotation(p_delta)
 
 	transform.basis = Basis.rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw - PI)
 
 	if camera and ! VRManager.is_xr_active():
 		camera.transform.origin = Vector3(0.0, 1.0, 0.0) * camera_height
 		camera.transform.basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), rotation_pitch)
+		
+	emit_signal("internal_rotation_updated", CAMERA_FIRST_PERSON)
 
 
 func update_origin(p_origin_offset: Vector3) -> void:

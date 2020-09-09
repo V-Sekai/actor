@@ -77,10 +77,6 @@ func teleport_to(p_transform: Transform) -> void:
 	set_global_transform(p_transform, true)
 
 
-func _on_transform_changed() -> void:
-	._on_transform_changed()
-
-
 func cache_nodes() -> void:
 	.cache_nodes()
 

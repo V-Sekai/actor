@@ -56,19 +56,18 @@ func movement_is_locked() -> bool:
 
 
 func master_movement(p_delta: float) -> void:
-	if p_delta > 0.0:
-		if is_entity_master():
-			_player_input.update_movement_input(desired_direction)
+	if is_entity_master():
+		_player_input.update_movement_input(desired_direction)
 
-		if _state_machine:
-			_state_machine.set_input_magnitude(_player_input.input_magnitude)
-			
-			if !movement_is_locked():
-				_state_machine.set_input_direction(_player_input.input_direction)
-			else:
-				_state_machine.set_input_direction(Vector3())
-			
-			_state_machine.update(p_delta)
+	if _state_machine:
+		_state_machine.set_input_magnitude(_player_input.input_magnitude)
+		
+		if !movement_is_locked():
+			_state_machine.set_input_direction(_player_input.input_direction)
+		else:
+			_state_machine.set_input_direction(Vector3())
+		
+		_state_machine.update(p_delta)
 
 
 func move(p_target_velocity: Vector3) -> Vector3:
@@ -94,7 +93,7 @@ func preprocess_master_or_puppet_state() -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
 		if _extended_kinematic_body:
-			_extended_kinematic_body.collision_layer = other_player_collision
+			_extended_kinematic_body.queue_free()
 		_camera_controller_node.queue_free()
 		_camera_controller_node.get_parent().remove_child(_camera_controller_node)
 		_camera_controller_node = null
@@ -218,13 +217,16 @@ func _entity_physics_process(p_delta: float) -> void:
 		master_movement(p_delta)
 
 	# There is a slight delay in the movement, but this allows framerate independent movement
-	current_origin = entity_node.global_transform.origin
+	if entity_node.get_entity_parent():
+		current_origin = entity_node.global_transform.origin
+	else:
+		current_origin = entity_node.global_transform.origin
 
 	if _target_node:
 		_target_node.transform.origin = current_origin
 
-	if ! is_entity_master():
-		_extended_kinematic_body.global_transform.origin = get_global_origin()
+	#if ! is_entity_master():
+	#	_extended_kinematic_body.global_transform.origin = get_global_origin()
 
 	if teleport_flag:
 		_target_smooth_node.teleport()
@@ -232,9 +234,6 @@ func _entity_physics_process(p_delta: float) -> void:
 		
 	if _ik_space:
 		_ik_space.update_physics(p_delta)
-		
-	if _target_smooth_node:
-		_target_smooth_node._physics_process(p_delta)
 
 func _entity_process(p_delta: float) -> void:
 	._entity_process(p_delta)

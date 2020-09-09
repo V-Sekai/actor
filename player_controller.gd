@@ -253,8 +253,6 @@ func _entity_process(p_delta: float) -> void:
 	else:
 		_render_node.transform.basis = get_transform().basis
 
-	if _target_smooth_node:
-		_target_smooth_node._process(p_delta)
 	if _avatar_display:
 		_avatar_display.update(p_delta)
 

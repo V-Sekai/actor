@@ -210,10 +210,9 @@ func _entity_physics_process(p_delta: float) -> void:
 		_player_input.update_head_accumulation()
 		_player_input.update_input(p_delta)
 
-	_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
-	_player_input.input_magnitude = 0.0
-
-	if is_entity_master():
+		_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
+		_player_input.input_magnitude = 0.0
+		
 		master_movement(p_delta)
 
 	# There is a slight delay in the movement, but this allows framerate independent movement
@@ -224,9 +223,6 @@ func _entity_physics_process(p_delta: float) -> void:
 
 	if _target_node:
 		_target_node.transform.origin = current_origin
-
-	#if ! is_entity_master():
-	#	_extended_kinematic_body.global_transform.origin = get_global_origin()
 
 	if teleport_flag:
 		_target_smooth_node.teleport()

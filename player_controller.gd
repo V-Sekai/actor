@@ -248,9 +248,6 @@ func _entity_process(p_delta: float) -> void:
 	else:
 		_render_node.transform.basis = get_transform().basis
 
-	if _avatar_display:
-		_avatar_display.update(p_delta)
-
 	entity_node.network_logic_node.set_dirty(true)
 
 func _entity_ready() -> void:
@@ -278,8 +275,8 @@ func _entity_ready() -> void:
 		_state_machine.start_state = NodePath("Spawned")
 	_state_machine.start()
 	
-	_avatar_display._entity_ready()
 	_ik_space._entity_ready()
+	_avatar_display._entity_ready()
 
 	preprocess_master_or_puppet_state()
 	_target_node = get_node_or_null(_target_node_path)

@@ -19,11 +19,11 @@ var input_direction: Vector3 = Vector3() setget set_input_direction
 var input_magnitude: float = 0.0 setget set_input_magnitude
 
 
-func set_input_direction(p_input_direction: Vector3):
+func set_input_direction(p_input_direction: Vector3) -> void:
 	input_direction = p_input_direction
 
 
-func set_input_magnitude(p_input_magnitude: float):
+func set_input_magnitude(p_input_magnitude: float) -> void:
 	input_magnitude = p_input_magnitude
 
 

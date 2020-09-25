@@ -85,5 +85,5 @@ func _entity_ready() -> void:
 	_third_person_render_node.show()
 
 
-func _on_transform_changed():
+func _on_transform_changed() -> void:
 	._on_transform_changed()

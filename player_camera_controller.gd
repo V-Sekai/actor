@@ -8,7 +8,12 @@ var camera: Camera = null
 
 export (bool) var is_active: bool = true
 
+# Camera mode
 enum { CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON }
+var camera_mode: int = CAMERA_FIRST_PERSON
+
+# Side
+var side_offset: float = 0.25
 
 # Height
 var camera_height: float = 0
@@ -25,16 +30,29 @@ var origin_offset: Vector3 = Vector3()
 signal internal_rotation_updated(p_camera_type)
 
 func update(p_delta: float) -> void:
-	if is_active and p_delta > 0.0:
-		rotation_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
+	var corrected_pitch: float = 0.0
+	if is_active and ! VRManager.is_xr_active():
+		corrected_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
 
-	transform.basis = Basis.rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw - PI)
+	var pitch_basis:Basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), corrected_pitch)
+	var yaw_basis:Basis = Basis.rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw - PI)
+
+	transform.origin = Vector3()
+	transform.basis = yaw_basis
 
 	if camera and ! VRManager.is_xr_active():
 		camera.transform.origin = Vector3(0.0, 1.0, 0.0) * camera_height
-		camera.transform.basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), rotation_pitch)
+		camera.transform.basis = pitch_basis
 		
-	emit_signal("internal_rotation_updated", CAMERA_FIRST_PERSON)
+	# Third-person camera
+	if camera_mode == CAMERA_THIRD_PERSON:
+		translate(Vector3(1.0, 0.0, 0.0) * side_offset)
+		translate(Vector3(0.0, 0.0, 1.0) * cos(corrected_pitch))
+		translate(Vector3(0.0, 1.0, 0.0) * sin(corrected_pitch))
+	else:
+		transform.origin = Vector3()
+		
+	emit_signal("internal_rotation_updated", camera_mode)
 
 
 func update_origin(p_origin_offset: Vector3) -> void:
@@ -54,6 +72,9 @@ func setup_origin() -> void:
 			if camera:
 				camera.set_current(true)
 
+func _input(p_event: InputEvent) -> void:
+	if p_event.is_action_pressed("toggle_camera_mode"):
+		camera_mode = CAMERA_THIRD_PERSON if camera_mode == CAMERA_FIRST_PERSON else CAMERA_FIRST_PERSON
 
 func _enter_tree() -> void:
 	add_to_group("camera_controllers")

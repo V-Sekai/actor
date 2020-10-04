@@ -1,7 +1,6 @@
 extends "actor_controller.gd"
 
 # Consts
-const player_camera_controller_const = preload("player_camera_controller.gd")
 const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")
 
 export (NodePath) var _target_node_path: NodePath = NodePath()
@@ -127,37 +126,33 @@ func _on_transform_changed() -> void:
 		_camera_controller_node.rotation_yaw = get_transform().basis.get_euler().y
 
 
-func _on_camera_internal_rotation_updated(p_camera_type: int) -> void:
-	if (
-		_camera_controller_node
-		and p_camera_type == player_camera_controller_const.CAMERA_FIRST_PERSON
-	):
-		var camera_controller_yaw_basis = Basis().rotated(
-			Vector3(0, 1, 0), _camera_controller_node.rotation_yaw
+func _on_camera_internal_rotation_updated(_camera_type: int) -> void:
+	var camera_controller_yaw_basis = Basis().rotated(
+		Vector3(0, 1, 0), _camera_controller_node.rotation_yaw
+	)
+
+	var basis: Basis
+
+	if _camera_controller_node.camera:
+		# Movement directions are relative to this. (TODO: refactor)
+		match VRManager.vr_user_preferences.movement_orientation:
+			VRManager.vr_user_preferences.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
+				basis = _camera_controller_node.camera.global_transform.basis
+			VRManager.vr_user_preferences.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
+				basis = _camera_controller_node.global_transform.basis
+			VRManager.vr_user_preferences.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
+				basis = _player_input.vr_locomotion_component.get_controller_direction()
+			_:
+				basis = _camera_controller_node.transform.basis
+	
+	desired_direction = Basis(\
+		Vector3(cos(basis.get_euler().y), 0.0, -sin(basis.get_euler().y)),\
+		Vector3(),\
+		Vector3(-sin(basis.get_euler().y), 0.0, -cos(basis.get_euler().y))\
 		)
-
-		var basis: Basis
-
-		if _camera_controller_node.camera:
-			# Movement directions are relative to this. (TODO: refactor)
-			match VRManager.vr_user_preferences.movement_orientation:
-				VRManager.vr_user_preferences.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
-					basis = _camera_controller_node.camera.global_transform.basis
-				VRManager.vr_user_preferences.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
-					basis = _camera_controller_node.global_transform.basis
-				VRManager.vr_user_preferences.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
-					basis = _player_input.vr_locomotion_component.get_controller_direction()
-				_:
-					basis = _camera_controller_node.transform.basis
-		
-		desired_direction = Basis(\
-			Vector3(cos(basis.get_euler().y), 0.0, -sin(basis.get_euler().y)),\
-			Vector3(),\
-			Vector3(-sin(basis.get_euler().y), 0.0, -cos(basis.get_euler().y))\
-			)
-		
-		# Overall entity rotation
-		set_transform(Transform(camera_controller_yaw_basis, get_origin()))
+	
+	# Overall entity rotation
+	set_transform(Transform(camera_controller_yaw_basis, get_origin()))
 
 
 func _on_touched_by_body(p_body) -> void:

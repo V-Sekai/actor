@@ -13,7 +13,6 @@ func _change_state(state_name: String) -> void:
 		return
 	._change_state(state_name)
 
-
 # Input actions
 var input_direction: Vector3 = Vector3() setget set_input_direction
 var input_magnitude: float = 0.0 setget set_input_magnitude
@@ -37,6 +36,10 @@ func get_input_magnitude() -> float:
 
 func is_attempting_movement() -> bool:
 	return input_direction.length() > 0.0 and input_magnitude > 0.0
+	
+
+func is_attempting_jumping() -> bool:
+	return Input.is_action_just_pressed("jump")
 
 
 func get_actor_controller() -> Node:
@@ -45,6 +48,10 @@ func get_actor_controller() -> Node:
 
 func is_grounded() -> bool:
 	return get_actor_controller().is_grounded()
+	
+
+func set_grounded(p_grounded: bool) -> void:
+	get_actor_controller().set_grounded(p_grounded)
 
 
 func get_move_vector() -> Vector3:
@@ -89,6 +96,7 @@ func start() -> void:
 			"Falling": get_node_or_null("Falling"),
 			"Stop": get_node_or_null("Stop"),
 			"Landed": get_node_or_null("Landed"),
+			"Pre-Jump": get_node_or_null("Pre-Jump"),
 			"Networked": get_node_or_null("Networked")
 		}
 

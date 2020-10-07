@@ -73,6 +73,11 @@ func is_grounded() -> bool:
 		return false
 
 
+func set_grounded(p_is_grounded: bool) -> void:
+	if _extended_kinematic_body:
+		_extended_kinematic_body.is_grounded = p_is_grounded
+
+
 func teleport_to(p_transform: Transform) -> void:
 	set_global_transform(p_transform, true)
 

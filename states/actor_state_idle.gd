@@ -5,8 +5,9 @@ func enter() -> void:
 	if state_machine.is_attempting_movement():
 		change_state("Locomotion")
 		return
-	else:
-		pass
+	elif state_machine.is_attempting_jumping():
+		change_state("Pre-Jump")
+		return
 
 
 func update(_delta: float) -> void:
@@ -15,8 +16,9 @@ func update(_delta: float) -> void:
 	if state_machine.is_attempting_movement():
 		change_state("Locomotion")
 		return
-	else:
-		pass
+	elif state_machine.is_attempting_jumping():
+		change_state("Pre-Jump")
+		return
 
 
 func exit() -> void:

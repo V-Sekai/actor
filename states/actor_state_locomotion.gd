@@ -20,6 +20,10 @@ func update(_delta: float) -> void:
 			* state_machine.get_input_magnitude()
 		)
 	)
+	
+	if state_machine.is_attempting_jumping():
+		change_state("Pre-Jump")
+	
 	state_machine.move(state_machine.get_move_vector())
 
 	if ! state_machine.is_attempting_movement():

@@ -1,4 +1,5 @@
 extends "actor_controller.gd"
+tool
 
 # Consts
 const vr_manager_const = preload("res://addons/vr_manager/vr_manager.gd")

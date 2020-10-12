@@ -94,6 +94,8 @@ func preprocess_master_or_puppet_state() -> void:
 	else:
 		if _extended_kinematic_body:
 			_extended_kinematic_body.queue_free()
+			_extended_kinematic_body.get_parent().remove_child(_extended_kinematic_body)
+			_extended_kinematic_body = null
 		_camera_controller_node.queue_free()
 		_camera_controller_node.get_parent().remove_child(_camera_controller_node)
 		_camera_controller_node = null

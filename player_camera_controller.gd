@@ -52,6 +52,8 @@ func update(p_delta: float) -> void:
 	else:
 		transform.origin = Vector3()
 		
+	rotation_pitch = corrected_pitch
+		
 	emit_signal("internal_rotation_updated", camera_mode)
 
 

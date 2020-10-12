@@ -6,9 +6,9 @@ func enter() -> void:
 	var jump_velocity : float = DEFAULT_JUMP_VELOCITY
 	var jump_direction: Vector3 = Vector3.UP * jump_velocity
 	
-	state_machine.set_move_vector(
+	state_machine.set_velocity(
 		(
-			state_machine.get_move_vector() + jump_direction
+			state_machine.get_velocity() + jump_direction
 		)
 	)
 	

@@ -11,15 +11,15 @@ export (NodePath) var _third_person_render_node_path: NodePath = NodePath()
 onready var _third_person_render_node: Node = get_node_or_null(_third_person_render_node_path)
 
 # Vector fed into the kinematic movement
-var move_vector: Vector3 = Vector3() setget set_move_vector, get_move_vector
+var velocity: Vector3 = Vector3() setget set_velocity, get_velocity
 
 
-func set_move_vector(p_move_vector: Vector3) -> void:
-	move_vector = p_move_vector
+func set_velocity(p_velocity: Vector3) -> void:
+	velocity = p_velocity
 
 
-func get_move_vector() -> Vector3:
-	return move_vector
+func get_velocity() -> Vector3:
+	return velocity
 
 
 #
@@ -73,10 +73,6 @@ func cache_nodes() -> void:
 	_state_machine = get_node_or_null(_state_machine_path)
 	if _state_machine == self:
 		_state_machine = null
-
-
-func get_gravity() -> float:
-	return -9.8 * 3
 
 
 func _entity_ready() -> void:

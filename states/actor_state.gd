@@ -1,6 +1,5 @@
 extends "res://addons/state_machine/state.gd"
 
-
 func enter() -> void:
 	pass
 

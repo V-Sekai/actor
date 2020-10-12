@@ -54,12 +54,12 @@ func set_grounded(p_grounded: bool) -> void:
 	get_actor_controller().set_grounded(p_grounded)
 
 
-func get_move_vector() -> Vector3:
-	return get_actor_controller().get_move_vector()
+func get_velocity() -> Vector3:
+	return get_actor_controller().get_velocity()
 
 
-func set_move_vector(p_move_vector: Vector3) -> void:
-	get_actor_controller().set_move_vector(p_move_vector)
+func set_velocity(p_velocity: Vector3) -> void:
+	get_actor_controller().set_velocity(p_velocity)
 
 
 func get_direction_vector() -> Vector3:
@@ -78,8 +78,8 @@ func set_euler(p_euler: Vector3) -> void:
 	actor_controller.set_euler(p_euler)
 
 
-func move(p_movement: Vector3) -> void:
-	actor_controller.move(p_movement)
+func move(p_movement: Vector3) -> Vector3:
+	return actor_controller.move(p_movement)
 
 
 func update(p_delta: float) -> void:

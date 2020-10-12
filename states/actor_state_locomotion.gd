@@ -13,7 +13,7 @@ func update(_delta: float) -> void:
 	var input_direction: Vector3 = state_machine.get_input_direction()
 
 	state_machine.set_direction_vector(input_direction)
-	state_machine.set_move_vector(
+	state_machine.set_velocity(
 		(
 			state_machine.get_direction_vector()
 			* state_machine.actor_controller.walk_speed
@@ -24,7 +24,7 @@ func update(_delta: float) -> void:
 	if state_machine.is_attempting_jumping():
 		change_state("Pre-Jump")
 	
-	state_machine.move(state_machine.get_move_vector())
+	state_machine.move(state_machine.get_velocity())
 
 	if ! state_machine.is_attempting_movement():
 		change_state("Stop")

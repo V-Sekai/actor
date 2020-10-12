@@ -78,6 +78,14 @@ func set_grounded(p_is_grounded: bool) -> void:
 		_extended_kinematic_body.is_grounded = p_is_grounded
 
 
+func get_gravity_speed() -> float:
+	return 9.8 * 3
+
+
+func get_gravity_direction() -> Vector3:
+	return Vector3(0.0, -1.0, 0.0)
+
+
 func teleport_to(p_transform: Transform) -> void:
 	set_global_transform(p_transform, true)
 

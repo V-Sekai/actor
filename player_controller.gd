@@ -206,7 +206,6 @@ func _entity_physics_process(p_delta: float) -> void:
 			teleport_to(teleport_transform)
 
 		_player_input.update_head_accumulation()
-		_player_input.update_input(p_delta)
 
 		_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
 		_player_input.input_magnitude = 0.0

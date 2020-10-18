@@ -1,11 +1,6 @@
 extends "actor_state.gd"
 
-
-func enter() -> void:
-	pass
-
-
-func update(_delta: float) -> void:
+func locomotion() -> void:
 	if ! state_machine.is_grounded():
 		change_state("Falling")
 		return
@@ -31,6 +26,14 @@ func update(_delta: float) -> void:
 		return
 	else:
 		pass
+
+
+func enter() -> void:
+	locomotion()
+
+
+func update(_delta: float) -> void:
+	locomotion()
 
 
 func exit() -> void:

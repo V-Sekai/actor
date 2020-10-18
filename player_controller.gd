@@ -284,6 +284,7 @@ func _entity_ready() -> void:
 			# By default, kinematic body is not affected by its parent's movement
 			_target_node.set_as_toplevel(true)
 			_target_smooth_node.set_as_toplevel(true)
+			_target_smooth_node.process_priority = EntityManager.process_priority + 1
 
 			current_origin = get_global_transform().origin
 			_target_node.global_transform = Transform(Basis(), current_origin)

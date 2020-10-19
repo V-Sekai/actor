@@ -4,11 +4,11 @@
 [ext_resource path="res://addons/vr_manager/camera_interaction_ray.gd" type="Script" id=2]
 [ext_resource path="res://addons/vsk_avatar/gizmo_reference.tscn" type="PackedScene" id=3]
 
-[sub_resource type="SphereMesh" id=1]
-
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=1]
 flags_unshaded = true
 albedo_color = Color( 1, 0, 0, 1 )
+
+[sub_resource type="SphereMesh" id=2]
 
 [node name="ARVROrigin" type="ARVROrigin"]
 script = ExtResource( 1 )
@@ -24,14 +24,13 @@ script = ExtResource( 2 )
 target = NodePath("../Target")
 
 [node name="Target" type="Spatial" parent="ARVRCamera"]
-visible = false
 
 [node name="Indicator" type="MeshInstance" parent="ARVRCamera/Target"]
 transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0 )
-visible = false
+material_override = SubResource( 1 )
 cast_shadow = 0
-mesh = SubResource( 1 )
-material/0 = SubResource( 2 )
+mesh = SubResource( 2 )
+material/0 = null
 
 [node name="GizmoReference" parent="." instance=ExtResource( 3 )]
 visible = false

@@ -55,10 +55,9 @@ func movement_is_locked() -> bool:
 	return movement_lock_count > 0
 
 
-func master_movement(p_delta: float) -> void:
-	if is_entity_master():
-		_player_input.update_movement_input(desired_direction)
-
+func _master_movement(p_delta: float) -> void:
+	_player_input.update_movement_input(desired_direction)
+	
 	if _state_machine:
 		_state_machine.set_input_magnitude(_player_input.input_magnitude)
 		
@@ -84,23 +83,6 @@ func move(p_target_velocity: Vector3) -> Vector3:
 	var move_ret: Vector3 = .move(p_target_velocity + (transformed_frame_offset * physics_fps))
 	#set_global_transform(Transform(entity_node.global_transform.basis, _extended_kinematic_body.global_transform.origin))
 	return move_ret
-
-
-func preprocess_master_or_puppet_state() -> void:
-	if is_entity_master():
-		if _extended_kinematic_body:
-			_extended_kinematic_body.collision_layer = local_player_collision
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	else:
-		if _extended_kinematic_body:
-			_extended_kinematic_body.queue_free()
-			_extended_kinematic_body.get_parent().remove_child(_extended_kinematic_body)
-			_extended_kinematic_body = null
-		_camera_controller_node.queue_free()
-		_camera_controller_node.get_parent().remove_child(_camera_controller_node)
-		_camera_controller_node = null
-
-	#update_network_player_name()
 
 
 func _on_target_smooth_transform_complete(p_delta) -> void:
@@ -133,9 +115,9 @@ func _on_camera_internal_rotation_updated(_camera_type: int) -> void:
 	var camera_controller_yaw_basis = Basis().rotated(
 		Vector3(0, 1, 0), _camera_controller_node.rotation_yaw
 	)
-
+	
 	var basis: Basis
-
+	
 	if _camera_controller_node.camera:
 		# Movement directions are relative to this. (TODO: refactor)
 		match VRManager.vr_user_preferences.movement_orientation:
@@ -147,7 +129,7 @@ func _on_camera_internal_rotation_updated(_camera_type: int) -> void:
 				basis = _player_input.vr_locomotion_component.get_controller_direction()
 			_:
 				basis = _camera_controller_node.transform.basis
-	
+				
 	desired_direction = Basis(\
 		Vector3(cos(basis.get_euler().y), 0.0, -sin(basis.get_euler().y)),\
 		Vector3(),\
@@ -181,6 +163,7 @@ func get_attachment_node(p_attachment_id: int) -> Node:
 func _can_teleport() -> bool:
 	return true
 
+
 func _schedule_teleport(p_transform: Transform) -> void:
 	teleport_transform = p_transform
 	teleport_flag = true
@@ -197,20 +180,39 @@ func get_player_pickup_controller() -> Node:
 func _threaded_instance_post_setup() -> void:
 	_avatar_display.load_model()
 
+func _setup_target() -> void:
+	_target_node = get_node_or_null(_target_node_path)
+	if _target_node:
+		if _target_node == self or not _target_node is Spatial:
+			_target_node = null
+		else:
+			# By default, kinematic body is not affected by its parent's movement
+			_target_node.set_as_toplevel(true)
+			_target_smooth_node.set_as_toplevel(true)
+			_target_smooth_node.process_priority = EntityManager.process_priority + 1
+
+			current_origin = get_global_transform().origin
+			_target_node.global_transform = Transform(Basis(), current_origin)
+			#_target_smooth_node.global_transform = _target_node.global_transform
+		_target_smooth_node.teleport()
+
+func _master_physics_update(p_delta: float) -> void:
+	if teleport_flag:
+		teleport_to(teleport_transform)
+
+	_player_input.update_head_accumulation()
+
+	_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
+	_player_input.input_magnitude = 0.0
+	
+	_master_movement(p_delta)
+
 
 func _entity_physics_process(p_delta: float) -> void:
 	._entity_physics_process(p_delta)
 	
 	if is_entity_master():
-		if teleport_flag:
-			teleport_to(teleport_transform)
-
-		_player_input.update_head_accumulation()
-
-		_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
-		_player_input.input_magnitude = 0.0
-		
-		master_movement(p_delta)
+		_master_physics_update(p_delta)
 
 	# There is a slight delay in the movement, but this allows framerate independent movement
 	if entity_node.get_entity_parent():
@@ -227,69 +229,77 @@ func _entity_physics_process(p_delta: float) -> void:
 		
 	if _ik_space:
 		_ik_space.update_physics(p_delta)
+		
+func _master_process(p_delta: float) -> void:
+	_player_input.update_input(p_delta)
+	_player_input.update_origin(
+		origin_offset + Vector3(0.0, -_avatar_display.height_offset, 0.0)
+	)
+
+	if _render_node:
+		var camera_offset: Vector3 = _player_input.transform_origin_offset(
+			_player_input.get_head_accumulator()
+		)
+		_render_node.transform.basis = get_transform().basis
+
+func _puppet_process(p_delta) -> void:
+	_render_node.transform.basis = get_transform().basis
+
+func _master_ready() -> void:
+	_player_input.setup_xr_camera()
+	
+	if _extended_kinematic_body:
+		_extended_kinematic_body.collision_layer = local_player_collision
+		
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
+func _free_master_nodes() -> void:
+	if _extended_kinematic_body:
+		_extended_kinematic_body.queue_free()
+		_extended_kinematic_body.get_parent().remove_child(_extended_kinematic_body)
+		_extended_kinematic_body = null
+		
+	if _camera_controller_node:
+		_camera_controller_node.queue_free()
+		_camera_controller_node.get_parent().remove_child(_camera_controller_node)
+		_camera_controller_node = null
+	
+func _puppet_ready() -> void:
+	# Callback for when the first packet is received. If this entity is not
+	# owned by the player, wait for the first packet to be received
+	_render_node.hide()
+	if get_entity_node().network_logic_node:
+		_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT)
+	
+	_state_machine.start_state = NodePath("Networked")
+	
+	_free_master_nodes()
 
 func _entity_process(p_delta: float) -> void:
 	._entity_process(p_delta)
 	
 	if is_entity_master():
-		_player_input.update_input(p_delta)
-		_player_input.update_origin(
-			origin_offset + Vector3(0.0, -_avatar_display.height_offset, 0.0)
-		)
-
-		if _render_node:
-			var camera_offset: Vector3 = _player_input.transform_origin_offset(
-				_player_input.get_head_accumulator()
-			)
-			_render_node.transform.basis = get_transform().basis
+		_master_process(p_delta)
 	else:
-		_render_node.transform.basis = get_transform().basis
+		_puppet_process(p_delta)
 
 	entity_node.network_logic_node.set_dirty(true)
 
 func _entity_ready() -> void:
 	._entity_ready()
-	
-	# Callback for when the first packet is received. If this entity is not
-	# owned by the player, wait for the first packet to be received
-	if ! is_entity_master():
-		_render_node.hide()
-		if get_entity_node().network_logic_node:
-			_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT)
 		
 	# State machine
 	if ! is_entity_master():
-		_state_machine.start_state = NodePath("Networked")
+		_puppet_ready()
 	else:
-		_player_input.setup_xr_camera()
+		_master_ready()
 		
-		# Teleport callback
-		var teleport:Spatial = VRManager.xr_origin.get_component_by_name("TeleportComponent")
-		if teleport:
-			teleport.assign_can_teleport_funcref(self, "_can_teleport")
-			teleport.assign_teleport_callback_funcref(self, "_schedule_teleport")
-			
-		_state_machine.start_state = NodePath("Spawned")
 	_state_machine.start()
 	
 	_ik_space._entity_ready()
 	_avatar_display._entity_ready()
 
-	preprocess_master_or_puppet_state()
-	_target_node = get_node_or_null(_target_node_path)
-	if _target_node:
-		if _target_node == self or not _target_node is Spatial:
-			_target_node = null
-		else:
-			# By default, kinematic body is not affected by its parent's movement
-			_target_node.set_as_toplevel(true)
-			_target_smooth_node.set_as_toplevel(true)
-			_target_smooth_node.process_priority = EntityManager.process_priority + 1
-
-			current_origin = get_global_transform().origin
-			_target_node.global_transform = Transform(Basis(), current_origin)
-			#_target_smooth_node.global_transform = _target_node.global_transform
-		_target_smooth_node.teleport()
+	_setup_target()
 		
 	# Set the camera controller's initial rotation to be that of entity's rotation
 	_on_transform_changed()

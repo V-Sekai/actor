@@ -64,6 +64,7 @@ var _render_node: Spatial = null
 
 func cache_nodes() -> void:
 	.cache_nodes()
+	
 	# Render node
 	_render_node = get_node_or_null(_render_node_path)
 	if _render_node == self or not _render_node is Spatial:

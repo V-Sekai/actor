@@ -16,6 +16,9 @@ onready var _camera_controller_node: Spatial = get_node_or_null(_camera_controll
 export (NodePath) var _player_input_path: NodePath = NodePath()
 onready var _player_input: Node = get_node_or_null(_player_input_path)
 
+export (NodePath) var _player_interaction_controller_path: NodePath = NodePath()
+var _player_interaction_controller: Node = null
+
 export (NodePath) var _player_pickup_controller_path: NodePath = NodePath()
 var _player_pickup_controller: Node = null
 
@@ -32,7 +35,6 @@ var frame_offset: Vector3 = Vector3()
 var origin_offset: Vector3 = Vector3()
 
 # Movement / Interpolation
-var desired_direction: Basis = Vector3()
 var current_origin: Vector3 = Vector3()
 var movement_lock_count: int = 0
 
@@ -56,7 +58,7 @@ func movement_is_locked() -> bool:
 
 
 func _master_movement(p_delta: float) -> void:
-	_player_input.update_movement_input(desired_direction)
+	_player_input.update_movement_input(_get_desired_direction())
 	
 	if _state_machine:
 		_state_machine.set_input_magnitude(_player_input.input_magnitude)
@@ -96,6 +98,8 @@ func cache_nodes() -> void:
 	# Node caching
 	_player_pickup_controller = get_node_or_null(_player_pickup_controller_path)
 	_player_pickup_controller.player_controller = self
+	
+	_player_interaction_controller = get_node_or_null(_player_interaction_controller_path)
 
 	_ik_space = _render_node.get_node_or_null("IKSpace")
 
@@ -106,38 +110,29 @@ func cache_nodes() -> void:
 func _on_transform_changed() -> void:
 	._on_transform_changed()
 
-	# Update the camera
-	if _camera_controller_node:
-		_camera_controller_node.rotation_yaw = get_transform().basis.get_euler().y
 
-
-func _on_camera_internal_rotation_updated(_camera_type: int) -> void:
+func _get_desired_direction() -> Basis:
 	var camera_controller_yaw_basis = Basis().rotated(
 		Vector3(0, 1, 0), _camera_controller_node.rotation_yaw
 	)
 	
-	var basis: Basis
+	var basis: Basis = camera_controller_yaw_basis
 	
 	if _camera_controller_node.camera:
 		# Movement directions are relative to this. (TODO: refactor)
 		match VRManager.vr_user_preferences.movement_orientation:
 			VRManager.vr_user_preferences.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
-				basis = _camera_controller_node.camera.global_transform.basis
+				basis = camera_controller_yaw_basis * _camera_controller_node.camera.transform.basis
 			VRManager.vr_user_preferences.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
-				basis = _camera_controller_node.global_transform.basis
+				basis = camera_controller_yaw_basis
 			VRManager.vr_user_preferences.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
-				basis = _player_input.vr_locomotion_component.get_controller_direction()
-			_:
-				basis = _camera_controller_node.transform.basis
+				basis = camera_controller_yaw_basis * _player_input.vr_locomotion_component.get_controller_direction()
 				
-	desired_direction = Basis(\
-		Vector3(cos(basis.get_euler().y), 0.0, -sin(basis.get_euler().y)),\
+	return Basis(\
+		Vector3(-cos(basis.get_euler().y), 0.0, sin(basis.get_euler().y)),\
 		Vector3(),\
-		Vector3(-sin(basis.get_euler().y), 0.0, -cos(basis.get_euler().y))\
+		Vector3(sin(basis.get_euler().y), 0.0, cos(basis.get_euler().y))\
 		)
-	
-	# Overall entity rotation
-	set_transform(Transform(camera_controller_yaw_basis, get_origin()))
 
 
 func _on_touched_by_body(p_body) -> void:
@@ -178,6 +173,8 @@ func get_player_pickup_controller() -> Node:
 
 
 func _threaded_instance_post_setup() -> void:
+	._threaded_instance_post_setup()
+	
 	_avatar_display.load_model()
 
 func _setup_target() -> void:
@@ -196,16 +193,27 @@ func _setup_target() -> void:
 			#_target_smooth_node.global_transform = _target_node.global_transform
 		_target_smooth_node.teleport()
 
+
+func _update_master_transform() -> void:
+	var camera_controller_yaw_basis = Basis().rotated(
+		Vector3(0, 1, 0), _camera_controller_node.rotation_yaw
+	)
+	
+	set_transform(Transform(camera_controller_yaw_basis, get_origin()))
+
 func _master_physics_update(p_delta: float) -> void:
+	_player_input.update_physics_input(p_delta)
+	
 	if teleport_flag:
 		teleport_to(teleport_transform)
-
-	_player_input.update_head_accumulation()
 
 	_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
 	_player_input.input_magnitude = 0.0
 	
 	_master_movement(p_delta)
+	_update_master_transform()
+	
+	_player_interaction_controller.update(get_entity_node(), p_delta)
 
 
 func _entity_physics_process(p_delta: float) -> void:
@@ -230,8 +238,8 @@ func _entity_physics_process(p_delta: float) -> void:
 	if _ik_space:
 		_ik_space.update_physics(p_delta)
 		
-func _master_process(p_delta: float) -> void:
-	_player_input.update_input(p_delta)
+func _master_representation_process(p_delta: float) -> void:
+	_player_input.update_representation_input(p_delta)
 	_player_input.update_origin(
 		origin_offset + Vector3(0.0, -_avatar_display.height_offset, 0.0)
 	)
@@ -242,7 +250,7 @@ func _master_process(p_delta: float) -> void:
 		)
 		_render_node.transform.basis = get_transform().basis
 
-func _puppet_process(p_delta) -> void:
+func _puppet_representation_process(p_delta) -> void:
 	_render_node.transform.basis = get_transform().basis
 
 func _master_ready() -> void:
@@ -275,18 +283,22 @@ func _puppet_ready() -> void:
 	
 	_free_master_nodes()
 
-func _entity_process(p_delta: float) -> void:
-	._entity_process(p_delta)
+func _entity_representation_process(p_delta: float) -> void:
+	._entity_representation_process(p_delta)
 	
 	if is_entity_master():
-		_master_process(p_delta)
+		_master_representation_process(p_delta)
 	else:
-		_puppet_process(p_delta)
+		_puppet_representation_process(p_delta)
 
 	entity_node.network_logic_node.set_dirty(true)
 
 func _entity_ready() -> void:
 	._entity_ready()
+	
+	# Update the camera
+	if _camera_controller_node:
+		_camera_controller_node.rotation_yaw = get_transform().basis.get_euler().y
 		
 	# State machine
 	if ! is_entity_master():
@@ -302,4 +314,5 @@ func _entity_ready() -> void:
 	_setup_target()
 		
 	# Set the camera controller's initial rotation to be that of entity's rotation
-	_on_transform_changed()
+	if _camera_controller_node:
+		_camera_controller_node.rotation_yaw = get_transform().basis.get_euler().y

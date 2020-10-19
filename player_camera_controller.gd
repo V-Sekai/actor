@@ -22,12 +22,13 @@ var camera_height: float = 0
 var rotation_yaw: float = 0.0 # radians
 var rotation_pitch: float = 0.0 # radians
 
+# Used to provide representation interpolation for snapping
+var rotation_yaw_snap_offset: float = 0.0 # radians
+
 var rotation_pitch_min: float = deg2rad(-89.5)
 var rotation_pitch_max: float = deg2rad(89.5)
 
 var origin_offset: Vector3 = Vector3()
-
-signal internal_rotation_updated(p_camera_type)
 
 func update(p_delta: float) -> void:
 	var corrected_pitch: float = 0.0
@@ -35,7 +36,7 @@ func update(p_delta: float) -> void:
 		corrected_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
 
 	var pitch_basis:Basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), corrected_pitch)
-	var yaw_basis:Basis = Basis.rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw - PI)
+	var yaw_basis:Basis = Basis.rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw + rotation_yaw_snap_offset - PI)
 
 	transform.origin = Vector3()
 	transform.basis = yaw_basis
@@ -52,8 +53,6 @@ func update(p_delta: float) -> void:
 		transform.origin = Vector3()
 		
 	rotation_pitch = corrected_pitch
-		
-	emit_signal("internal_rotation_updated", camera_mode)
 
 
 func update_origin(p_origin_offset: Vector3) -> void:

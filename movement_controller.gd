@@ -102,7 +102,6 @@ func cache_nodes() -> void:
 		):
 			_extended_kinematic_body = null
 
-
 func _ready() -> void:
 	if _extended_kinematic_body:
 		_extended_kinematic_body.set_as_toplevel(true)

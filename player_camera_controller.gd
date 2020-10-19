@@ -41,8 +41,7 @@ func update(p_delta: float) -> void:
 	transform.basis = yaw_basis
 
 	if camera and ! VRManager.is_xr_active():
-		camera.transform.origin = Vector3(0.0, 1.0, 0.0) * camera_height
-		camera.transform.basis = pitch_basis
+		camera.transform = Transform(pitch_basis, Vector3(0.0, 1.0, 0.0) * camera_height)
 		
 	# Third-person camera
 	if camera_mode == CAMERA_THIRD_PERSON:

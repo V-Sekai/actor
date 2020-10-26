@@ -296,10 +296,6 @@ func _entity_representation_process(p_delta: float) -> void:
 func _entity_ready() -> void:
 	._entity_ready()
 	
-	# Update the camera
-	if _camera_controller_node:
-		_camera_controller_node.rotation_yaw = get_transform().basis.get_euler().y
-		
 	# State machine
 	if ! is_entity_master():
 		_puppet_ready()

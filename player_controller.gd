@@ -70,8 +70,15 @@ func _master_movement(p_delta: float) -> void:
 		
 		_state_machine.update(p_delta)
 
+func update_origin() -> void:
+	# There is a slight delay in the movement, but this allows framerate independent movement
+	if entity_node.get_entity_parent():
+		current_origin = entity_node.global_transform.origin
+	else:
+		current_origin = entity_node.transform.origin
 
-func move(p_target_velocity: Vector3) -> Vector3:
+func set_movement_vector(p_target_velocity: Vector3) -> void:
+	.set_movement_vector(p_target_velocity)
 	var transformed_frame_offset: Vector3 = Vector3()
 	if _player_input:
 		# Get any potential offset (head-position, VR for this frame)
@@ -82,9 +89,11 @@ func move(p_target_velocity: Vector3) -> Vector3:
 		# Compensate for the offset
 		origin_offset += frame_offset
 
-	var move_ret: Vector3 = .move(p_target_velocity + (transformed_frame_offset * physics_fps))
-	#set_global_transform(Transform(entity_node.global_transform.basis, _extended_kinematic_body.global_transform.origin))
-	return move_ret
+	movement_vector += (transformed_frame_offset * physics_fps)
+	
+
+func move(p_movement_vector: Vector3) -> void:
+	.move(p_movement_vector)
 
 
 func _on_target_smooth_transform_complete(p_delta) -> void:
@@ -201,6 +210,9 @@ func _update_master_transform() -> void:
 	
 	set_transform(Transform(camera_controller_yaw_basis, get_origin()))
 
+func _master_kinematic_integration_update(p_delta: float) -> void:
+	move(movement_vector)
+
 func _master_physics_update(p_delta: float) -> void:
 	_player_input.update_physics_input(p_delta)
 	
@@ -210,17 +222,22 @@ func _master_physics_update(p_delta: float) -> void:
 	_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
 	_player_input.input_magnitude = 0.0
 	
+	_player_interaction_controller.update(get_entity_node(), p_delta)
+	
 	_master_movement(p_delta)
 	_update_master_transform()
-	
-	_player_interaction_controller.update(get_entity_node(), p_delta)
 
 
 func _entity_physics_process(p_delta: float) -> void:
 	._entity_physics_process(p_delta)
 	
+	if _ik_space:
+		_ik_space.update_physics(p_delta)
+	
 	if is_entity_master():
 		_master_physics_update(p_delta)
+	
+	update_origin()
 
 	# There is a slight delay in the movement, but this allows framerate independent movement
 	if entity_node.get_entity_parent():
@@ -235,9 +252,15 @@ func _entity_physics_process(p_delta: float) -> void:
 		_target_smooth_node.teleport()
 		teleport_flag = false
 		
-	if _ik_space:
-		_ik_space.update_physics(p_delta)
-		
+
+func _entity_kinematic_integration_callback(p_delta: float) -> void:
+	_master_kinematic_integration_update(p_delta)
+	
+
+func _entity_physics_post_process(p_delta: float) -> void:
+	._entity_physics_post_process(p_delta)
+
+
 func _master_representation_process(p_delta: float) -> void:
 	_player_input.update_representation_input(p_delta)
 	_player_input.update_origin(
@@ -254,6 +277,8 @@ func _puppet_representation_process(p_delta) -> void:
 	_render_node.transform.basis = get_transform().basis
 
 func _master_ready() -> void:
+	get_entity_node().register_kinematic_integration_callback()
+	
 	_player_input.setup_xr_camera()
 	
 	if _extended_kinematic_body:

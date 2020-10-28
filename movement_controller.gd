@@ -9,6 +9,8 @@ const extended_kinematic_body_const = preload("res://addons/extended_kinematic_b
 export (NodePath) var _extended_kinematic_body_path: NodePath = NodePath()
 var _extended_kinematic_body: extended_kinematic_body_const = null setget set_kinematic_body, get_kinematic_body
 
+var motion_vector: Vector3 = Vector3()
+var movement_vector: Vector3 = Vector3() # Movement for this frame
 
 func set_global_origin(p_origin: Vector3, _p_update_physics: bool = false) -> void:
 	.set_global_origin(p_origin, _p_update_physics)
@@ -51,21 +53,21 @@ func get_direction_normal() -> Vector3:
 	return get_global_transform().basis.z
 
 
-func move(p_target_velocity: Vector3) -> Vector3:
-	var motion: Vector3 = Vector3()
-
+func move(p_target_velocity: Vector3) -> void:
 	if _extended_kinematic_body:
 		if p_target_velocity.length() > 0.0:
-			motion = _extended_kinematic_body.extended_move(p_target_velocity, MAX_SLIDE_ATTEMPTS)
+			motion_vector = _extended_kinematic_body.extended_move(p_target_velocity, MAX_SLIDE_ATTEMPTS)
 			set_global_transform(
 				Transform(
 					get_global_transform().basis, _extended_kinematic_body.global_transform.origin
 				)
 			)
 
-	return motion
 
-
+func set_movement_vector(p_target_velocity: Vector3) -> void:
+	movement_vector = p_target_velocity
+	
+	
 func is_grounded() -> bool:
 	if _extended_kinematic_body:
 		return _extended_kinematic_body.is_grounded
@@ -88,7 +90,7 @@ func get_gravity_direction() -> Vector3:
 
 func teleport_to(p_transform: Transform) -> void:
 	set_global_transform(p_transform, true)
-
+	
 
 func cache_nodes() -> void:
 	.cache_nodes()

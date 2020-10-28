@@ -78,9 +78,12 @@ func set_euler(p_euler: Vector3) -> void:
 	actor_controller.set_euler(p_euler)
 
 
-func move(p_movement: Vector3) -> Vector3:
-	return actor_controller.move(p_movement)
+func set_movement_vector(p_movement: Vector3) -> void:
+	actor_controller.set_movement_vector(p_movement)
 
+
+func get_motion_vector() -> Vector3:
+	return actor_controller.motion_vector
 
 func update(p_delta: float) -> void:
 	.update(p_delta)

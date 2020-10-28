@@ -1,6 +1,12 @@
 extends "actor_state.gd"
 
 func locomotion() -> void:
+	if ! state_machine.is_attempting_movement():
+		change_state("Stop")
+		return
+	else:
+		pass
+	
 	if ! state_machine.is_grounded():
 		change_state("Falling")
 		return
@@ -19,13 +25,7 @@ func locomotion() -> void:
 	if state_machine.is_attempting_jumping():
 		change_state("Pre-Jump")
 	
-	state_machine.move(state_machine.get_velocity())
-
-	if ! state_machine.is_attempting_movement():
-		change_state("Stop")
-		return
-	else:
-		pass
+	state_machine.set_movement_vector(state_machine.get_velocity())
 
 
 func enter() -> void:

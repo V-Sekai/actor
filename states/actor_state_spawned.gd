@@ -6,7 +6,7 @@ func enter() -> void:
 
 
 func update(_delta: float) -> void:
-	state_machine.move(Vector3())
+	state_machine.set_movement_vector(Vector3())
 
 	if state_machine.is_grounded():
 		change_state("Idle")

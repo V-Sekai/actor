@@ -180,6 +180,12 @@ func teleport_to(p_transform: Transform) -> void:
 func get_player_pickup_controller() -> Node:
 	return _player_pickup_controller
 
+func respawn() -> void:
+	teleport_to(VSKNetworkManager.get_random_spawn_transform())
+
+func _check_respawn_bounds() -> void:
+	if get_global_origin().y < VSKMapManager.RESPAWN_HEIGHT:
+		teleport_to(teleport_transform)
 
 func _threaded_instance_post_setup() -> void:
 	._threaded_instance_post_setup()
@@ -226,6 +232,8 @@ func _master_physics_update(p_delta: float) -> void:
 	
 	_master_movement(p_delta)
 	_update_master_transform()
+	
+	_check_respawn_bounds()
 
 
 func _entity_physics_process(p_delta: float) -> void:

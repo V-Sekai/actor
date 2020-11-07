@@ -22,6 +22,9 @@ var _player_interaction_controller: Node = null
 export (NodePath) var _player_pickup_controller_path: NodePath = NodePath()
 var _player_pickup_controller: Node = null
 
+export (NodePath) var _player_nametag_path: NodePath = NodePath()
+var _player_nametag: Node = null
+
 export (int, LAYERS_3D_PHYSICS) var local_player_collision: int = 1
 export (int, LAYERS_3D_PHYSICS) var other_player_collision: int = 1
 
@@ -42,6 +45,10 @@ var movement_lock_count: int = 0
 var teleport_flag: bool = false
 var teleport_transform: Transform = Transform()
 
+func _player_name_updated(p_network_id: int, p_name: String) -> void:
+	if p_network_id == get_network_master():
+		if _player_nametag:
+			_player_nametag.set_nametag(p_name)
 
 func lock_movement() -> void:
 	movement_lock_count += 1
@@ -114,6 +121,8 @@ func cache_nodes() -> void:
 
 	_avatar_display = _render_node.get_node_or_null("AvatarDisplay")
 	_avatar_display.simulation_logic = self
+	
+	_player_nametag = get_node_or_null(_player_nametag_path)
 
 
 func _on_transform_changed() -> void:
@@ -313,6 +322,11 @@ func _puppet_ready() -> void:
 		_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT)
 	
 	_state_machine.start_state = NodePath("Networked")
+	
+	if VSKNetworkManager.connect("player_name_updated", self, "_player_name_updated") != OK:
+		printerr("Could not connect player_name_updated")
+	_player_nametag.set_nametag(VSKNetworkManager.player_display_names[get_network_master()])
+	_player_nametag.show()
 	
 	_free_master_nodes()
 

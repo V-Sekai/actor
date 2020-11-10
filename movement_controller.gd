@@ -104,7 +104,9 @@ func cache_nodes() -> void:
 		):
 			_extended_kinematic_body = null
 
-func _ready() -> void:
+func _entity_ready() -> void:
+	._entity_ready()
+	
 	if _extended_kinematic_body:
 		_extended_kinematic_body.set_as_toplevel(true)
 		_extended_kinematic_body.global_transform = Transform(

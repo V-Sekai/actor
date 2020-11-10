@@ -15,21 +15,21 @@ var movement_vector: Vector3 = Vector3() # Movement for this frame
 func set_global_origin(p_origin: Vector3, _p_update_physics: bool = false) -> void:
 	.set_global_origin(p_origin, _p_update_physics)
 	if _p_update_physics:
-		if _extended_kinematic_body:
+		if _extended_kinematic_body and _extended_kinematic_body.is_inside_tree():
 			_extended_kinematic_body.set_global_transform(Transform(Basis(), get_global_origin()))
 
 
 func set_transform(p_transform: Transform, _p_update_physics: bool = false) -> void:
 	.set_transform(p_transform, _p_update_physics)
 	if _p_update_physics:
-		if _extended_kinematic_body:
+		if _extended_kinematic_body and _extended_kinematic_body.is_inside_tree():
 			_extended_kinematic_body.set_global_transform(Transform(Basis(), get_global_origin()))
 
 
 func set_global_transform(p_global_transform: Transform, _p_update_physics: bool = false) -> void:
 	.set_global_transform(p_global_transform, _p_update_physics)
 	if _p_update_physics:
-		if _extended_kinematic_body:
+		if _extended_kinematic_body and _extended_kinematic_body.is_inside_tree():
 			_extended_kinematic_body.set_global_transform(Transform(Basis(), get_global_origin()))
 
 

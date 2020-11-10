@@ -45,15 +45,26 @@ var movement_lock_count: int = 0
 var teleport_flag: bool = false
 var teleport_transform: Transform = Transform()
 
-func _player_name_updated(p_network_id: int, p_name: String) -> void:
+func _player_display_name_updated(p_network_id: int, p_name: String) -> void:
 	if p_network_id == get_network_master():
 		if _player_nametag:
 			_player_nametag.set_nametag(p_name)
+			if p_name != "":
+				_player_nametag.show()
+			else:
+				_player_nametag.hide()
+
+
+func _player_avatar_path_updated(p_network_id: int, p_path: String) -> void:
+	if get_network_master() == p_network_id:
+		_avatar_display.set_avatar_model_path(p_path)
+		_avatar_display.load_model()
+
 
 func lock_movement() -> void:
 	movement_lock_count += 1
 
-	
+
 func unlock_movement() -> void:
 	movement_lock_count -= 1
 	if movement_lock_count < 0:
@@ -198,8 +209,6 @@ func _check_respawn_bounds() -> void:
 
 func _threaded_instance_post_setup() -> void:
 	._threaded_instance_post_setup()
-	
-	_avatar_display.load_model()
 
 func _setup_target() -> void:
 	_target_node = get_node_or_null(_target_node_path)
@@ -296,6 +305,10 @@ func _puppet_representation_process(p_delta) -> void:
 func _master_ready() -> void:
 	get_entity_node().register_kinematic_integration_callback()
 	
+	### Avatar ###
+	_player_avatar_path_updated(get_network_master(), VSKPlayerManager.avatar_path)
+	###
+	
 	_player_input.setup_xr_camera()
 	
 	if _extended_kinematic_body:
@@ -318,15 +331,24 @@ func _puppet_ready() -> void:
 	# Callback for when the first packet is received. If this entity is not
 	# owned by the player, wait for the first packet to be received
 	_render_node.hide()
+	
 	if get_entity_node().network_logic_node:
 		_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT)
 	
 	_state_machine.start_state = NodePath("Networked")
 	
-	if VSKNetworkManager.connect("player_name_updated", self, "_player_name_updated") != OK:
-		printerr("Could not connect player_name_updated")
-	_player_nametag.set_nametag(VSKNetworkManager.player_display_names[get_network_master()])
-	_player_nametag.show()
+	### Avatar ###
+	if VSKNetworkManager.connect("player_avatar_path_updated", self, "_player_avatar_path_updated") != OK:
+		printerr("Could not connect player_avatar_path_updated")
+	if VSKNetworkManager.player_avatar_paths.has(get_network_master()):
+		_player_avatar_path_updated(get_network_master(), VSKNetworkManager.player_avatar_paths[get_network_master()])
+	###
+	
+	if VSKNetworkManager.connect("player_display_name_updated", self, "_player_display_name_updated") != OK:
+		printerr("Could not connect player_display_name_updated")
+	
+	if VSKNetworkManager.player_display_names.has(get_network_master()):
+		_player_display_name_updated(get_network_master(), VSKNetworkManager.player_display_names[get_network_master()])
 	
 	_free_master_nodes()
 

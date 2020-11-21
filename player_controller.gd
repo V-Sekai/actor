@@ -58,7 +58,7 @@ func _player_display_name_updated(p_network_id: int, p_name: String) -> void:
 func _player_avatar_path_updated(p_network_id: int, p_path: String) -> void:
 	if get_network_master() == p_network_id:
 		_avatar_display.set_avatar_model_path(p_path)
-		_avatar_display.load_model()
+		_avatar_display.load_model(false)
 
 
 func lock_movement() -> void:

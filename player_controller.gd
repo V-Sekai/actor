@@ -22,6 +22,9 @@ var _player_interaction_controller: Node = null
 export (NodePath) var _player_pickup_controller_path: NodePath = NodePath()
 var _player_pickup_controller: Node = null
 
+export (NodePath) var _player_teleport_controller_path: NodePath = NodePath()
+var _player_teleport_controller: Node = null
+
 export (NodePath) var _player_nametag_path: NodePath = NodePath()
 var _player_nametag: Node = null
 
@@ -41,9 +44,6 @@ var origin_offset: Vector3 = Vector3()
 var current_origin: Vector3 = Vector3()
 var movement_lock_count: int = 0
 
-# Teleport
-var teleport_flag: bool = false
-var teleport_transform: Transform = Transform()
 
 func _player_display_name_updated(p_network_id: int, p_name: String) -> void:
 	if p_network_id == get_network_master():
@@ -88,12 +88,14 @@ func _master_movement(p_delta: float) -> void:
 		
 		_state_machine.update(p_delta)
 
+
 func update_origin() -> void:
 	# There is a slight delay in the movement, but this allows framerate independent movement
 	if entity_node.get_entity_parent():
 		current_origin = entity_node.global_transform.origin
 	else:
 		current_origin = entity_node.transform.origin
+
 
 func set_movement_vector(p_target_velocity: Vector3) -> void:
 	.set_movement_vector(p_target_velocity)
@@ -125,6 +127,8 @@ func cache_nodes() -> void:
 	# Node caching
 	_player_pickup_controller = get_node_or_null(_player_pickup_controller_path)
 	_player_pickup_controller.player_controller = self
+	
+	_player_teleport_controller = get_node_or_null(_player_teleport_controller_path)
 	
 	_player_interaction_controller = get_node_or_null(_player_interaction_controller_path)
 
@@ -184,28 +188,9 @@ func get_attachment_node(p_attachment_id: int) -> Node:
 			return _render_node
 
 
-func _can_teleport() -> bool:
-	return true
-
-
-func _schedule_teleport(p_transform: Transform) -> void:
-	teleport_transform = p_transform
-	teleport_flag = true
-
-
-func teleport_to(p_transform: Transform) -> void:
-	.teleport_to(p_transform)
-
-
 func get_player_pickup_controller() -> Node:
 	return _player_pickup_controller
 
-func respawn() -> void:
-	teleport_to(VSKNetworkManager.get_random_spawn_transform())
-
-func _check_respawn_bounds() -> void:
-	if get_global_origin().y < VSKMapManager.RESPAWN_HEIGHT:
-		teleport_to(teleport_transform)
 
 func _threaded_instance_post_setup() -> void:
 	._threaded_instance_post_setup()
@@ -239,19 +224,18 @@ func _master_kinematic_integration_update(p_delta: float) -> void:
 
 func _master_physics_update(p_delta: float) -> void:
 	_player_input.update_physics_input(p_delta)
-	
-	if teleport_flag:
-		teleport_to(teleport_transform)
 
 	_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
 	_player_input.input_magnitude = 0.0
-	
+		
+	if _player_teleport_controller:
+		_player_teleport_controller.check_respawn_bounds()
+		_player_teleport_controller.check_teleport()
+		
 	_player_interaction_controller.update(get_entity_node(), p_delta)
 	
 	_master_movement(p_delta)
 	_update_master_transform()
-	
-	_check_respawn_bounds()
 
 
 func _entity_physics_process(p_delta: float) -> void:
@@ -273,10 +257,6 @@ func _entity_physics_process(p_delta: float) -> void:
 
 	if _target_node:
 		_target_node.transform.origin = current_origin
-
-	if teleport_flag:
-		_target_smooth_node.teleport()
-		teleport_flag = false
 		
 
 func _entity_kinematic_integration_callback(p_delta: float) -> void:
@@ -310,6 +290,8 @@ func _master_ready() -> void:
 	###
 	
 	_player_input.setup_xr_camera()
+	
+	_player_teleport_controller.setup(self)
 	
 	if _extended_kinematic_body:
 		_extended_kinematic_body.collision_layer = local_player_collision

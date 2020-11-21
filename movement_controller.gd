@@ -88,10 +88,6 @@ func get_gravity_direction() -> Vector3:
 	return Vector3(0.0, -1.0, 0.0)
 
 
-func teleport_to(p_transform: Transform) -> void:
-	set_global_transform(p_transform, true)
-	
-
 func cache_nodes() -> void:
 	.cache_nodes()
 

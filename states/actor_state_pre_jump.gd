@@ -11,6 +11,7 @@ func enter() -> void:
 			state_machine.get_velocity() + jump_direction
 		)
 	)
+	state_machine.set_movement_vector(state_machine.get_velocity())
 	
 	state_machine.set_grounded(false)
 	change_state("Falling")

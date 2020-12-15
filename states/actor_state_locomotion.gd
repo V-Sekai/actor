@@ -13,10 +13,9 @@ func locomotion() -> void:
 
 	var input_direction: Vector3 = state_machine.get_input_direction()
 
-	state_machine.set_direction_vector(input_direction)
 	state_machine.set_velocity(
 		(
-			state_machine.get_direction_vector()
+			input_direction
 			* state_machine.actor_controller.walk_speed
 			* state_machine.get_input_magnitude()
 		)

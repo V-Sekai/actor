@@ -23,16 +23,6 @@ func get_velocity() -> Vector3:
 
 
 #
-var direction_vector: Vector3 = Vector3() setget set_direction_vector, get_direction_vector
-
-
-func set_direction_vector(p_direction_vector: Vector3) -> void:
-	direction_vector = p_direction_vector
-
-
-func get_direction_vector() -> Vector3:
-	return direction_vector
-
 
 # Movement stats
 export (float) var sprint_speed: float = 10.0 setget set_sprint_speed, get_sprint_speed

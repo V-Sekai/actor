@@ -62,14 +62,6 @@ func set_velocity(p_velocity: Vector3) -> void:
 	get_actor_controller().set_velocity(p_velocity)
 
 
-func get_direction_vector() -> Vector3:
-	return get_actor_controller().get_direction_vector()
-
-
-func set_direction_vector(p_normal: Vector3) -> void:
-	get_actor_controller().set_direction_vector(p_normal)
-
-
 func get_euler() -> Vector3:
 	return get_actor_controller().get_euler()
 

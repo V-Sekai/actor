@@ -192,9 +192,6 @@ func get_player_pickup_controller() -> Node:
 	return _player_pickup_controller
 
 
-func _threaded_instance_post_setup() -> void:
-	._threaded_instance_post_setup()
-
 func _setup_target() -> void:
 	_target_node = get_node_or_null(_target_node_path)
 	if _target_node:
@@ -363,3 +360,8 @@ func _entity_ready() -> void:
 	# Set the camera controller's initial rotation to be that of entity's rotation
 	if _camera_controller_node:
 		_camera_controller_node.rotation_yaw = get_transform().basis.get_euler().y
+
+func _threaded_instance_setup(p_instance_id: int, p_network_reader: Reference) -> void:
+	._threaded_instance_setup(p_instance_id, p_network_reader)
+	
+	_avatar_display._threaded_instance_setup()

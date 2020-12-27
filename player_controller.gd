@@ -292,8 +292,6 @@ func _master_ready() -> void:
 	
 	if _extended_kinematic_body:
 		_extended_kinematic_body.collision_layer = local_player_collision
-		
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
 func _free_master_nodes() -> void:
 	if _extended_kinematic_body:

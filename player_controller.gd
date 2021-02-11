@@ -91,7 +91,8 @@ func _master_movement(p_delta: float) -> void:
 
 func update_origin() -> void:
 	# There is a slight delay in the movement, but this allows framerate independent movement
-	if entity_node.get_entity_parent():
+	if entity_node.hierarchy_component_node and\
+	entity_node.hierarchy_component_node.get_entity_parent():
 		current_origin = entity_node.global_transform.origin
 	else:
 		current_origin = entity_node.transform.origin
@@ -247,7 +248,8 @@ func _entity_physics_process(p_delta: float) -> void:
 	update_origin()
 
 	# There is a slight delay in the movement, but this allows framerate independent movement
-	if entity_node.get_entity_parent():
+	if entity_node.hierarchy_component_node and\
+	entity_node.hierarchy_component_node.get_entity_parent():
 		current_origin = entity_node.global_transform.origin
 	else:
 		current_origin = entity_node.transform.origin

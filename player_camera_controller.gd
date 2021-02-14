@@ -99,7 +99,7 @@ func update_origin(p_origin_offset: Vector3) -> void:
 
 
 func setup_origin() -> void:
-	if is_network_master():
+	if get_tree().has_network_peer() and is_network_master():
 		if ! origin:
 			origin = player_origin_const.instance()
 			add_child(origin)
@@ -114,15 +114,17 @@ func _input(p_event: InputEvent) -> void:
 		camera_mode = CAMERA_THIRD_PERSON if camera_mode == CAMERA_FIRST_PERSON else CAMERA_FIRST_PERSON
 
 func _enter_tree() -> void:
-	add_to_group("camera_controllers")
-	setup_origin()
+	if !Engine.is_editor_hint():
+		add_to_group("camera_controllers")
+		setup_origin()
 
 func _exit_tree() -> void:
-	camera = null
+	if !Engine.is_editor_hint():
+		camera = null
 
-	if origin:
-		origin.queue_free()
-		origin.get_parent().remove_child(origin)
+		if origin:
+			origin.queue_free()
+			origin.get_parent().remove_child(origin)
 
-	if is_in_group("camera_controllers"):
-		remove_from_group("camera_controllers")
+		if is_in_group("camera_controllers"):
+			remove_from_group("camera_controllers")

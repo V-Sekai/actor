@@ -77,6 +77,7 @@ func set_movement_vector(p_movement: Vector3) -> void:
 func get_motion_vector() -> Vector3:
 	return actor_controller.motion_vector
 
+
 func update(p_delta: float) -> void:
 	.update(p_delta)
 

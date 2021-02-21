@@ -217,11 +217,11 @@ func _update_master_transform() -> void:
 	
 	set_transform(Transform(camera_controller_yaw_basis, get_origin()))
 
-func _master_kinematic_integration_update(p_delta: float) -> void:
+func _master_kinematic_integration_update(_delta: float) -> void:
 	move(movement_vector)
 
 func _master_physics_update(p_delta: float) -> void:
-	_player_input.update_physics_input(p_delta)
+	_player_input.update_physics_input()
 
 	_player_input.input_direction = Vector3(0.0, 0.0, 0.0)
 	_player_input.input_magnitude = 0.0
@@ -273,12 +273,9 @@ func _master_representation_process(p_delta: float) -> void:
 	)
 
 	if _render_node:
-		var camera_offset: Vector3 = _player_input.transform_origin_offset(
-			_player_input.get_head_accumulator()
-		)
 		_render_node.transform.basis = get_transform().basis
 
-func _puppet_representation_process(p_delta) -> void:
+func _puppet_representation_process(_delta) -> void:
 	_render_node.transform.basis = get_transform().basis
 
 func _master_ready() -> void:
@@ -312,19 +309,17 @@ func _puppet_ready() -> void:
 	_render_node.hide()
 	
 	if get_entity_node().network_logic_node:
-		_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT)
+		assert(_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT) == OK)
 	
 	_state_machine.start_state = NodePath("Networked")
 	
 	### Avatar ###
-	if VSKNetworkManager.connect("player_avatar_path_updated", self, "_player_avatar_path_updated") != OK:
-		printerr("Could not connect player_avatar_path_updated")
+	assert(VSKNetworkManager.connect("player_avatar_path_updated", self, "_player_avatar_path_updated") == OK)
 	if VSKNetworkManager.player_avatar_paths.has(get_network_master()):
 		_player_avatar_path_updated(get_network_master(), VSKNetworkManager.player_avatar_paths[get_network_master()])
 	###
 	
-	if VSKNetworkManager.connect("player_display_name_updated", self, "_player_display_name_updated") != OK:
-		printerr("Could not connect player_display_name_updated")
+	assert(VSKNetworkManager.connect("player_display_name_updated", self, "_player_display_name_updated") == OK)
 	
 	if VSKNetworkManager.player_display_names.has(get_network_master()):
 		_player_display_name_updated(get_network_master(), VSKNetworkManager.player_display_names[get_network_master()])

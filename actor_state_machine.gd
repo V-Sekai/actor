@@ -4,6 +4,7 @@ tool
 export (NodePath) var actor_controller_path = NodePath()
 var actor_controller = null
 
+var noclip: bool = false
 
 func _change_state(state_name: String) -> void:
 	"""
@@ -17,6 +18,17 @@ func _change_state(state_name: String) -> void:
 var input_direction: Vector3 = Vector3() setget set_input_direction
 var input_magnitude: float = 0.0 setget set_input_magnitude
 
+func is_noclipping() -> bool:
+	return noclip
+
+func get_vertical_input() -> float:
+	var vertical_input: float = 0.0
+	if InputManager.is_ingame_action_pressed("fly_up"):
+		vertical_input += 1.0
+	if InputManager.is_ingame_action_pressed("fly_down"):
+		vertical_input -= 1.0
+		
+	return vertical_input
 
 func set_input_direction(p_input_direction: Vector3) -> void:
 	input_direction = p_input_direction
@@ -39,7 +51,7 @@ func is_attempting_movement() -> bool:
 	
 
 func is_attempting_jumping() -> bool:
-	return Input.is_action_just_pressed("jump")
+	return InputManager.is_ingame_action_just_pressed("jump")
 
 
 func get_actor_controller() -> Node:
@@ -93,7 +105,8 @@ func start() -> void:
 			"Stop": get_node_or_null("Stop"),
 			"Landed": get_node_or_null("Landed"),
 			"Pre-Jump": get_node_or_null("Pre-Jump"),
-			"Networked": get_node_or_null("Networked")
+			"Networked": get_node_or_null("Networked"),
+			"Noclip": get_node_or_null("Noclip")
 		}
 
 		actor_controller = get_node_or_null(actor_controller_path)

@@ -28,11 +28,17 @@ func locomotion() -> void:
 
 
 func enter() -> void:
-	locomotion()
+	if state_machine.is_noclipping():
+		change_state("Noclip")
+	else:
+		locomotion()
 
 
 func update(_delta: float) -> void:
-	locomotion()
+	if state_machine.is_noclipping():
+		change_state("Noclip")
+	else:
+		locomotion()
 
 
 func exit() -> void:

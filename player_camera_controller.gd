@@ -65,6 +65,9 @@ func get_camera_clip_distance(_camera) -> float:
 	return collision_distance
 
 func update() -> void:
+	if InputManager.is_ingame_action_just_pressed("toggle_camera_mode"):
+		camera_mode = CAMERA_THIRD_PERSON if camera_mode == CAMERA_FIRST_PERSON else CAMERA_FIRST_PERSON
+	
 	var corrected_pitch: float = 0.0
 	if is_active and ! VRManager.is_xr_active():
 		corrected_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
@@ -108,10 +111,6 @@ func setup_origin() -> void:
 			camera = origin.get_node_or_null("ARVRCamera")
 			if camera:
 				camera.set_current(true)
-
-func _input(p_event: InputEvent) -> void:
-	if p_event.is_action_pressed("toggle_camera_mode"):
-		camera_mode = CAMERA_THIRD_PERSON if camera_mode == CAMERA_FIRST_PERSON else CAMERA_FIRST_PERSON
 
 func _enter_tree() -> void:
 	if !Engine.is_editor_hint():

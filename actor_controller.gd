@@ -27,6 +27,7 @@ func get_velocity() -> Vector3:
 # Movement stats
 export (float) var sprint_speed: float = 10.0 setget set_sprint_speed, get_sprint_speed
 export (float) var walk_speed: float = 5.0 setget set_walk_speed, get_walk_speed
+export (float) var fly_speed: float = 10.0 setget set_fly_speed, get_fly_speed
 
 
 func set_sprint_speed(p_speed: float) -> void:
@@ -44,6 +45,13 @@ func set_walk_speed(p_speed: float) -> void:
 func get_walk_speed() -> float:
 	return walk_speed
 
+
+func set_fly_speed(p_speed: float) -> void:
+	fly_speed = p_speed
+
+
+func get_fly_speed() -> float:
+	return fly_speed
 
 # Render
 export (NodePath) var _render_node_path: NodePath = NodePath()

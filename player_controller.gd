@@ -28,6 +28,10 @@ var _player_teleport_controller: Node = null
 export (NodePath) var _player_nametag_path: NodePath = NodePath()
 var _player_nametag: Node = null
 
+export (NodePath) var _collider_path: NodePath = NodePath()
+var _collider: CollisionShape = null
+
+
 export (int, LAYERS_3D_PHYSICS) var local_player_collision: int = 1
 export (int, LAYERS_3D_PHYSICS) var other_player_collision: int = 1
 
@@ -61,6 +65,19 @@ func _player_avatar_path_updated(p_network_id: int, p_path: String) -> void:
 		_avatar_display.load_model(false)
 
 
+func _update_noclip_state() -> void:
+	if VSKDebugManager.noclip_mode:
+		_collider.disabled = true
+		_state_machine.noclip = true
+	else:
+		_collider.disabled = false
+		_state_machine.noclip = false
+
+
+func _noclip_changed() -> void:
+	_update_noclip_state()
+
+
 func lock_movement() -> void:
 	movement_lock_count += 1
 
@@ -72,7 +89,11 @@ func unlock_movement() -> void:
 
 
 func movement_is_locked() -> bool:
-	return movement_lock_count > 0
+	return movement_lock_count > 0 or !InputManager.ingame_input_enabled()
+	
+	
+func using_flight_controls() -> bool:
+	return VSKDebugManager.noclip_mode
 
 
 func _master_movement(p_delta: float) -> void:
@@ -139,6 +160,7 @@ func cache_nodes() -> void:
 	_avatar_display.simulation_logic = self
 	
 	_player_nametag = get_node_or_null(_player_nametag_path)
+	_collider = get_node_or_null(_collider_path)
 
 
 func _on_transform_changed() -> void:
@@ -162,10 +184,20 @@ func _get_desired_direction() -> Basis:
 			VRManager.vr_user_preferences.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
 				basis = camera_controller_yaw_basis * _player_input.vr_locomotion_component.get_controller_direction()
 				
-	return Basis(\
-		Vector3(-cos(basis.get_euler().y), 0.0, sin(basis.get_euler().y)),\
-		Vector3(),\
-		Vector3(sin(basis.get_euler().y), 0.0, cos(basis.get_euler().y))\
+	if using_flight_controls():
+		return Basis(\
+			Vector3(-cos(basis.get_euler().y), 0.0, sin(basis.get_euler().y)),\
+			Vector3(),\
+			Vector3(
+				sin(basis.get_euler().y) * cos(basis.get_euler().x),
+				sin(basis.get_euler().x),
+				cos(basis.get_euler().y) * cos(basis.get_euler().x))\
+			)
+	else:
+		return Basis(\
+			Vector3(-cos(basis.get_euler().y), 0.0, sin(basis.get_euler().y)),\
+			Vector3(),\
+			Vector3(sin(basis.get_euler().y), 0.0, cos(basis.get_euler().y))\
 		)
 
 
@@ -279,6 +311,8 @@ func _puppet_representation_process(_delta) -> void:
 	_render_node.transform.basis = get_transform().basis
 
 func _master_ready() -> void:
+	_update_noclip_state()
+	
 	get_entity_node().register_kinematic_integration_callback()
 	
 	### Avatar ###
@@ -288,6 +322,8 @@ func _master_ready() -> void:
 	_player_input.setup_xr_camera()
 	
 	_player_teleport_controller.setup(self)
+	
+	assert(VSKDebugManager.connect("noclip_changed", self, "_noclip_changed") == OK)
 	
 	if _extended_kinematic_body:
 		_extended_kinematic_body.collision_layer = local_player_collision

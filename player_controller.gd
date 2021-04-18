@@ -25,8 +25,8 @@ var _player_pickup_controller: Node = null
 export (NodePath) var _player_teleport_controller_path: NodePath = NodePath()
 var _player_teleport_controller: Node = null
 
-export (NodePath) var _player_nametag_path: NodePath = NodePath()
-var _player_nametag: Node = null
+export (NodePath) var _player_info_tag_controller_path: NodePath = NodePath()
+var _player_info_tag_controller: Node = null
 
 export (NodePath) var _collider_path: NodePath = NodePath()
 var _collider: CollisionShape = null
@@ -47,17 +47,6 @@ var origin_offset: Vector3 = Vector3()
 # Movement / Interpolation
 var current_origin: Vector3 = Vector3()
 var movement_lock_count: int = 0
-
-
-func _player_display_name_updated(p_network_id: int, p_name: String) -> void:
-	if p_network_id == get_network_master():
-		if _player_nametag:
-			_player_nametag.set_nametag(p_name)
-			if p_name != "":
-				_player_nametag.show()
-			else:
-				_player_nametag.hide()
-
 
 func _player_avatar_path_updated(p_network_id: int, p_path: String) -> void:
 	if get_network_master() == p_network_id:
@@ -151,6 +140,7 @@ func cache_nodes() -> void:
 	_player_pickup_controller.player_controller = self
 	
 	_player_teleport_controller = get_node_or_null(_player_teleport_controller_path)
+	_player_info_tag_controller = get_node_or_null(_player_info_tag_controller_path)
 	
 	_player_interaction_controller = get_node_or_null(_player_interaction_controller_path)
 
@@ -159,7 +149,6 @@ func cache_nodes() -> void:
 	_avatar_display = _render_node.get_node_or_null("AvatarDisplay")
 	_avatar_display.simulation_logic = self
 	
-	_player_nametag = get_node_or_null(_player_nametag_path)
 	_collider = get_node_or_null(_collider_path)
 
 
@@ -355,11 +344,6 @@ func _puppet_ready() -> void:
 		_player_avatar_path_updated(get_network_master(), VSKNetworkManager.player_avatar_paths[get_network_master()])
 	###
 	
-	assert(VSKNetworkManager.connect("player_display_name_updated", self, "_player_display_name_updated") == OK)
-	
-	if VSKNetworkManager.player_display_names.has(get_network_master()):
-		_player_display_name_updated(get_network_master(), VSKNetworkManager.player_display_names[get_network_master()])
-	
 	_free_master_nodes()
 
 func _entity_representation_process(p_delta: float) -> void:
@@ -381,6 +365,8 @@ func _entity_ready() -> void:
 	else:
 		_master_ready()
 		
+	_player_info_tag_controller.setup(self)
+	
 	_state_machine.start()
 	
 	_ik_space._entity_ready()

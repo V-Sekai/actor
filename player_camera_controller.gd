@@ -34,6 +34,8 @@ var rotation_pitch_max: float = deg2rad(89.5)
 
 var origin_offset: Vector3 = Vector3()
 
+signal camera_mode_changed(p_camera_mode)
+
 func test_collision_point(p_ds: PhysicsDirectSpaceState, p_distance: float, p_start: Vector3, p_end: Vector3) -> float:
 	var result = p_ds.intersect_ray(p_start, p_end, [get_parent().global_transform.origin], camera_clip_layers, true, false)
 	if(!result.empty()):
@@ -67,6 +69,7 @@ func get_camera_clip_distance(_camera) -> float:
 func update() -> void:
 	if InputManager.is_ingame_action_just_pressed("toggle_camera_mode"):
 		camera_mode = CAMERA_THIRD_PERSON if camera_mode == CAMERA_FIRST_PERSON else CAMERA_FIRST_PERSON
+		emit_signal("camera_mode_changed", camera_mode)
 	
 	var corrected_pitch: float = 0.0
 	if is_active and ! VRManager.is_xr_active():

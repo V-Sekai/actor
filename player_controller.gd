@@ -28,6 +28,9 @@ var _player_teleport_controller: Node = null
 export (NodePath) var _player_info_tag_controller_path: NodePath = NodePath()
 var _player_info_tag_controller: Node = null
 
+export (NodePath) var _player_hand_controller_path: NodePath = NodePath()
+var _player_hand_controller: Node = null
+
 export (NodePath) var _collider_path: NodePath = NodePath()
 var _collider: CollisionShape = null
 
@@ -141,6 +144,7 @@ func cache_nodes() -> void:
 	
 	_player_teleport_controller = get_node_or_null(_player_teleport_controller_path)
 	_player_info_tag_controller = get_node_or_null(_player_info_tag_controller_path)
+	_player_hand_controller = get_node_or_null(_player_hand_controller_path)
 	
 	_player_interaction_controller = get_node_or_null(_player_interaction_controller_path)
 
@@ -366,6 +370,7 @@ func _entity_ready() -> void:
 		_master_ready()
 		
 	_player_info_tag_controller.setup(self)
+	_player_hand_controller.setup(self)
 	
 	_state_machine.start()
 	

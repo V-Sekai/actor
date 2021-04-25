@@ -51,11 +51,28 @@ var origin_offset: Vector3 = Vector3()
 var current_origin: Vector3 = Vector3()
 var movement_lock_count: int = 0
 
-func _player_avatar_path_updated(p_network_id: int, p_path: String) -> void:
-	if get_network_master() == p_network_id:
-		_avatar_display.set_avatar_model_path(p_path)
-		_avatar_display.load_model(false)
+##################
+# Avatar changes #
+##################
 
+func _update_avatar(p_path: String) -> void:
+	_avatar_display.set_avatar_model_path(p_path)
+	_avatar_display.load_model(false)
+
+func _player_network_avatar_path_updated(p_network_id: int, p_path: String) -> void:
+	if get_network_master() == p_network_id:
+		VSKNetworkManager.update_player_avatar_path(get_network_master(), p_path)
+		_update_avatar(p_path)
+
+func _on_rpc_avatar_path_updated(p_path):
+	VSKNetworkManager.update_player_avatar_path(get_network_master(), p_path)
+	_update_avatar(p_path)
+
+func _local_avatar_path_updated(p_path: String) -> void:
+	_update_avatar(p_path)
+	get_entity_node().rpc_table_node.rpc("set_avatar_path", p_path)
+
+#################
 
 func _update_noclip_state() -> void:
 	if VSKDebugManager.noclip_mode:
@@ -309,7 +326,8 @@ func _master_ready() -> void:
 	get_entity_node().register_kinematic_integration_callback()
 	
 	### Avatar ###
-	_player_avatar_path_updated(get_network_master(), VSKPlayerManager.avatar_path)
+	_update_avatar(VSKPlayerManager.avatar_path)
+	assert(VSKPlayerManager.connect("avatar_path_changed", self, "_local_avatar_path_updated") == OK)
 	###
 	
 	_player_input.setup_xr_camera()
@@ -345,7 +363,7 @@ func _puppet_ready() -> void:
 	### Avatar ###
 	assert(VSKNetworkManager.connect("player_avatar_path_updated", self, "_player_avatar_path_updated") == OK)
 	if VSKNetworkManager.player_avatar_paths.has(get_network_master()):
-		_player_avatar_path_updated(get_network_master(), VSKNetworkManager.player_avatar_paths[get_network_master()])
+		_update_avatar(VSKNetworkManager.player_avatar_paths[get_network_master()])
 	###
 	
 	_free_master_nodes()
@@ -387,3 +405,4 @@ func _threaded_instance_setup(p_instance_id: int, p_network_reader: Reference) -
 	._threaded_instance_setup(p_instance_id, p_network_reader)
 	
 	_avatar_display._threaded_instance_setup()
+

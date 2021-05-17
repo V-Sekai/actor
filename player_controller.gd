@@ -40,7 +40,13 @@ export (int, LAYERS_3D_PHYSICS) var other_player_collision: int = 1
 
 onready var physics_fps: int = ProjectSettings.get("physics/common/physics_fps")
 
+export (NodePath) var ik_space_path: NodePath = NodePath()
 var _ik_space: Spatial = null
+
+export (NodePath) var avatar_loader_path: NodePath = NodePath()
+var _avatar_loader: Node = null
+
+export (NodePath) var avatar_display_path: NodePath = NodePath()
 var _avatar_display: Spatial = null
 
 # The offset between the camera position and ARVROrigin center (none transformed)
@@ -55,9 +61,12 @@ var movement_lock_count: int = 0
 # Avatar changes #
 ##################
 
+func get_avatar_display() -> Spatial:
+	return _avatar_display
+
 func _update_avatar(p_path: String) -> void:
-	_avatar_display.set_avatar_model_path(p_path)
-	_avatar_display.load_model(false)
+	_avatar_loader.set_avatar_model_path(p_path)
+	_avatar_loader.load_model(false)
 
 func _player_network_avatar_path_updated(p_network_id: int, p_path: String) -> void:
 	if get_network_master() == p_network_id:
@@ -165,10 +174,12 @@ func cache_nodes() -> void:
 	
 	_player_interaction_controller = get_node_or_null(_player_interaction_controller_path)
 
-	_ik_space = _render_node.get_node_or_null("IKSpace")
+	_ik_space = get_node_or_null(ik_space_path)
 
-	_avatar_display = _render_node.get_node_or_null("AvatarDisplay")
+	_avatar_display = get_node_or_null(avatar_display_path)
 	_avatar_display.simulation_logic = self
+	
+	_avatar_loader = get_node_or_null(avatar_loader_path)
 	
 	_collider = get_node_or_null(_collider_path)
 

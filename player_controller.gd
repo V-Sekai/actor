@@ -66,7 +66,7 @@ func get_avatar_display() -> Spatial:
 
 func _update_avatar(p_path: String) -> void:
 	_avatar_loader.set_avatar_model_path(p_path)
-	_avatar_loader.load_model(false)
+	_avatar_loader.load_model(false, false)
 
 func _player_network_avatar_path_updated(p_network_id: int, p_path: String) -> void:
 	if get_network_master() == p_network_id:

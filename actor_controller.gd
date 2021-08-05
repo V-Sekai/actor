@@ -1,17 +1,20 @@
-extends "movement_controller.gd"
-tool
+@tool
+extends "res://addons/actor/movement_controller.gd" # movement_controller.gd
 
 const state_machine_const = preload("actor_state_machine.gd")
 
-export (NodePath) var _state_machine_path: NodePath = NodePath()
-var _state_machine: state_machine_const = null
+@export  var _state_machine_path: NodePath = NodePath()
+var _state_machine: Node = null # state_machine_const
 
 # Render
-export (NodePath) var _third_person_render_node_path: NodePath = NodePath()
-onready var _third_person_render_node: Node = get_node_or_null(_third_person_render_node_path)
+@export  var _third_person_render_node_path: NodePath = NodePath()
+@onready var _third_person_render_node: Node = get_node_or_null(_third_person_render_node_path)
 
 # Vector fed into the kinematic movement
-var velocity: Vector3 = Vector3() setget set_velocity, get_velocity
+var velocity: Vector3 = Vector3() :
+	set = set_velocity,
+	get = get_velocity
+
 
 
 func set_velocity(p_velocity: Vector3) -> void:
@@ -25,9 +28,18 @@ func get_velocity() -> Vector3:
 #
 
 # Movement stats
-export (float) var sprint_speed: float = 10.0 setget set_sprint_speed, get_sprint_speed
-export (float) var walk_speed: float = 5.0 setget set_walk_speed, get_walk_speed
-export (float) var fly_speed: float = 10.0 setget set_fly_speed, get_fly_speed
+@export  var sprint_speed: float = 10.0:
+	set = set_sprint_speed,
+	get = get_sprint_speed
+
+@export  var walk_speed: float = 5.0:
+	set = set_walk_speed,
+	get = get_walk_speed
+
+@export  var fly_speed: float = 10.0:
+	set = set_fly_speed,
+	get = get_fly_speed
+
 
 
 func set_sprint_speed(p_speed: float) -> void:
@@ -54,18 +66,18 @@ func get_fly_speed() -> float:
 	return fly_speed
 
 # Render
-export (NodePath) var _render_node_path: NodePath = NodePath()
-var _render_node: Spatial = null
+@export  var _render_node_path: NodePath # (NodePath) = NodePath()
+var _render_node: Node3D = null
 
 #var skeleton = null : Spatial
 
 
 func cache_nodes() -> void:
-	.cache_nodes()
+	super.cache_nodes()
 	
 	# Render node
 	_render_node = get_node_or_null(_render_node_path)
-	if _render_node == self or not _render_node is Spatial:
+	if _render_node == self or not _render_node is Node3D:
 		_render_node = null
 
 	# State machine node
@@ -75,10 +87,10 @@ func cache_nodes() -> void:
 
 
 func _entity_ready() -> void:
-	._entity_ready()
+	super._entity_ready()
 
 	_third_person_render_node.show()
 
 
 func _on_transform_changed() -> void:
-	._on_transform_changed()
+	super._on_transform_changed()

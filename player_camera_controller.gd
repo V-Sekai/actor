@@ -1,16 +1,18 @@
-extends Spatial
-tool
+@tool
+extends Node3D
 
 const player_origin_const = preload("player_origin.tscn")
 
-var origin: Spatial = null
-var camera: Camera = null
+var origin: Node3D = null
+var camera: Camera3D = null
 
-export (bool) var is_active: bool = true
-export (int, LAYERS_3D_PHYSICS) var camera_clip_layers: int = 1
+@export  var is_active: bool # (bool) = true
+@export  var camera_clip_layers: int # (int, LAYERS_3D_PHYSICS) = 1
 
 # Camera mode
-enum { CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON }
+const CAMERA_FIRST_PERSON=0
+const CAMERA_THIRD_PERSON=1
+
 var camera_mode: int = CAMERA_FIRST_PERSON
 
 # Side
@@ -36,9 +38,9 @@ var origin_offset: Vector3 = Vector3()
 
 signal camera_mode_changed(p_camera_mode)
 
-func test_collision_point(p_ds: PhysicsDirectSpaceState, p_distance: float, p_start: Vector3, p_end: Vector3) -> float:
+func test_collision_point(p_ds: PhysicsDirectSpaceState3D, p_distance: float, p_start: Vector3, p_end: Vector3) -> float:
 	var result = p_ds.intersect_ray(p_start, p_end, [get_parent().global_transform.origin], camera_clip_layers, true, false)
-	if(!result.empty()):
+	if(!result.is_empty()):
 		var new_distance = p_start.distance_to(result.position)
 		if(new_distance < p_distance):
 			return new_distance
@@ -51,10 +53,10 @@ func translate_third_person_camera(p_distance: float, p_corrected_pitch: float) 
 	translate(Vector3(0.0, 1.0, 0.0) * p_distance * sin(p_corrected_pitch))
 
 func get_camera_clip_distance(_camera) -> float:
-	var ds: PhysicsDirectSpaceState = PhysicsServer.space_get_direct_state(get_world().get_space())
+	var ds: PhysicsDirectSpaceState3D = PhysicsServer3D.space_get_direct_state(get_world_3d().get_space())
 	
 	var collision_distance = distance
-	var start_transform: Transform = get_parent().get_global_transform()
+	var start_transform: Transform3D = get_parent().get_global_transform()
 	var end_transform = get_global_transform()
 	
 	#var upper_left = end_transform.origin - p_camera.project_position(Vector2(0.0, 0.0), 0.0)
@@ -82,7 +84,7 @@ func update() -> void:
 	transform.basis = yaw_basis
 
 	if camera and ! VRManager.is_xr_active():
-		camera.transform = Transform(pitch_basis, Vector3(0.0, 1.0, 0.0) * camera_height)
+		camera.transform = Transform3D(pitch_basis, Vector3(0.0, 1.0, 0.0) * camera_height)
 		
 	# Third-person camera
 	if camera_mode == CAMERA_THIRD_PERSON:
@@ -101,17 +103,17 @@ func update() -> void:
 func update_origin(p_origin_offset: Vector3) -> void:
 	origin_offset = p_origin_offset
 	if origin:
-		origin.transform = Transform(Basis(), -origin_offset)
+		origin.transform = Transform3D(Basis(), -origin_offset)
 
 
 func setup_origin() -> void:
 	if get_tree().has_network_peer() and is_network_master():
 		if ! origin:
-			origin = player_origin_const.instance()
+			origin = player_origin_const.instantiate()
 			add_child(origin)
 			update_origin(origin_offset)
 
-			camera = origin.get_node_or_null("ARVRCamera")
+			camera = origin.get_node_or_null("XRCamera")
 			if camera:
 				camera.set_current(true)
 

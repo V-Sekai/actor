@@ -1,22 +1,26 @@
+@tool
 extends "res://addons/state_machine/state_machine.gd"
-tool
 
-export (NodePath) var actor_controller_path = NodePath()
-var actor_controller = null
+@export  var actor_controller_path : NodePath = NodePath()
+var actor_controller: Node = null # of type actor_controller.gd
 
 var noclip: bool = false
 
 func _change_state(state_name: String) -> void:
-	"""
-	The base state_machine interface this node extends does most of the work
-	"""
+	## 
+	## 	The base state_machine interface this node extends does most of the work
+	## 	
 	if not _active:
 		return
-	._change_state(state_name)
+	super._change_state(state_name)
 
 # Input actions
-var input_direction: Vector3 = Vector3() setget set_input_direction
-var input_magnitude: float = 0.0 setget set_input_magnitude
+var input_direction: Vector3 = Vector3() :
+	set = set_input_direction
+
+var input_magnitude: float = 0.0 :
+	set = set_input_magnitude
+
 
 func is_noclipping() -> bool:
 	return noclip
@@ -91,11 +95,11 @@ func get_motion_vector() -> Vector3:
 
 
 func update(p_delta: float) -> void:
-	.update(p_delta)
+	super.update(p_delta)
 
 
 func start() -> void:
-	.start()
+	super.start()
 	if ! Engine.is_editor_hint():
 		states_map = {
 			"Spawned": get_node_or_null("Spawned"),

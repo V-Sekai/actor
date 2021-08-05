@@ -19,7 +19,7 @@ static func get_absolute_basis(p_basis: Basis) -> Basis:
 
 	return m
 
-static func get_spatial_relative_movement_velocity(p_spatial: Spatial, p_input_direction: Vector2) -> Vector3:
+static func get_spatial_relative_movement_velocity(p_spatial: Node3D, p_input_direction: Vector2) -> Vector3:
 	var new_direction: Vector3 = Vector3()
 
 	if p_spatial:

@@ -1,4 +1,4 @@
-extends "actor_state.gd"
+extends "res://addons/actor/states/actor_state.gd" # actor_state.gd
 
 func locomotion() -> void:
 	if ! state_machine.is_attempting_movement():

@@ -1,53 +1,54 @@
-extends "actor_controller.gd"
-tool
+@tool
+extends "res://addons/actor/actor_controller.gd" # actor_controller.gd
 
 # Consts
 const vr_manager_const = preload("res://addons/sar1_vr_manager/vr_manager.gd")
+const pickup_controller_const = preload("res://addons/vsk_entities/extensions/pickup_controller.gd")
 
-export (NodePath) var _target_node_path: NodePath = NodePath()
-onready var _target_node: Spatial = get_node_or_null(_target_node_path)
+@export  var _target_node_path: NodePath = NodePath()
+@onready var _target_node: Node3D = get_node_or_null(_target_node_path)
 
-export (NodePath) var _target_smooth_node_path: NodePath = NodePath()
-onready var _target_smooth_node: Spatial = get_node_or_null(_target_smooth_node_path)
+@export  var _target_smooth_node_path: NodePath = NodePath()
+@onready var _target_smooth_node: Node3D = get_node_or_null(_target_smooth_node_path)
 
-export (NodePath) var _camera_controller_node_path: NodePath = NodePath()
-onready var _camera_controller_node: Spatial = get_node_or_null(_camera_controller_node_path)
+@export  var _camera_controller_node_path: NodePath = NodePath()
+@onready var _camera_controller_node: Node3D = get_node_or_null(_camera_controller_node_path)
 
-export (NodePath) var _player_input_path: NodePath = NodePath()
-onready var _player_input: Node = get_node_or_null(_player_input_path)
+@export  var _player_input_path: NodePath = NodePath()
+@onready var _player_input: Node = get_node_or_null(_player_input_path)
 
-export (NodePath) var _player_interaction_controller_path: NodePath = NodePath()
+@export  var _player_interaction_controller_path: NodePath = NodePath()
 var _player_interaction_controller: Node = null
 
-export (NodePath) var _player_pickup_controller_path: NodePath = NodePath()
+@export  var _player_pickup_controller_path: NodePath = NodePath()
 var _player_pickup_controller: Node = null
 
-export (NodePath) var _player_teleport_controller_path: NodePath = NodePath()
+@export  var _player_teleport_controller_path: NodePath = NodePath()
 var _player_teleport_controller: Node = null
 
-export (NodePath) var _player_info_tag_controller_path: NodePath = NodePath()
+@export  var _player_info_tag_controller_path: NodePath = NodePath()
 var _player_info_tag_controller: Node = null
 
-export (NodePath) var _player_hand_controller_path: NodePath = NodePath()
+@export  var _player_hand_controller_path: NodePath = NodePath()
 var _player_hand_controller: Node = null
 
-export (NodePath) var _collider_path: NodePath = NodePath()
-var _collider: CollisionShape = null
+@export  var _collider_path: NodePath = NodePath()
+var _collider: CollisionShape3D = null
 
 
-export (int, LAYERS_3D_PHYSICS) var local_player_collision: int = 1
-export (int, LAYERS_3D_PHYSICS) var other_player_collision: int = 1
+@export  var local_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
+@export  var other_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
 
-onready var physics_fps: int = ProjectSettings.get("physics/common/physics_fps")
+@onready var physics_fps: int = ProjectSettings.get("physics/common/physics_fps")
 
-export (NodePath) var ik_space_path: NodePath = NodePath()
-var _ik_space: Spatial = null
+@export  var ik_space_path: NodePath = NodePath()
+var _ik_space: Node3D = null
 
-export (NodePath) var avatar_loader_path: NodePath = NodePath()
+@export  var avatar_loader_path: NodePath = NodePath()
 var _avatar_loader: Node = null
 
-export (NodePath) var avatar_display_path: NodePath = NodePath()
-var _avatar_display: Spatial = null
+@export  var avatar_display_path: NodePath = NodePath()
+var _avatar_display: Node3D = null
 
 # The offset between the camera position and ARVROrigin center (none transformed)
 var frame_offset: Vector3 = Vector3()
@@ -61,7 +62,7 @@ var movement_lock_count: int = 0
 # Avatar changes #
 ##################
 
-func get_avatar_display() -> Spatial:
+func get_avatar_display() -> Node3D:
 	return _avatar_display
 
 func _update_avatar(p_path: String) -> void:
@@ -138,7 +139,7 @@ func update_origin() -> void:
 
 
 func set_movement_vector(p_target_velocity: Vector3) -> void:
-	.set_movement_vector(p_target_velocity)
+	super.set_movement_vector(p_target_velocity)
 	var transformed_frame_offset: Vector3 = Vector3()
 	if _player_input:
 		# Get any potential offset (head-position, VR for this frame)
@@ -153,7 +154,7 @@ func set_movement_vector(p_target_velocity: Vector3) -> void:
 	
 
 func move(p_movement_vector: Vector3) -> void:
-	.move(p_movement_vector)
+	super.move(p_movement_vector)
 
 
 func _on_target_smooth_transform_complete(p_delta) -> void:
@@ -162,7 +163,7 @@ func _on_target_smooth_transform_complete(p_delta) -> void:
 
 
 func cache_nodes() -> void:
-	.cache_nodes()
+	super.cache_nodes()
 
 	# Node caching
 	_player_pickup_controller = get_node_or_null(_player_pickup_controller_path)
@@ -185,7 +186,7 @@ func cache_nodes() -> void:
 
 
 func _on_transform_changed() -> void:
-	._on_transform_changed()
+	super._on_transform_changed()
 
 
 func _get_desired_direction() -> Basis:
@@ -198,11 +199,11 @@ func _get_desired_direction() -> Basis:
 	if _camera_controller_node.camera:
 		# Movement directions are relative to this. (TODO: refactor)
 		match VRManager.vr_user_preferences.movement_orientation:
-			VRManager.vr_user_preferences.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
+			VRManager.vr_user_preferences_const.movement_orientation_enum.HEAD_ORIENTED_MOVEMENT:
 				basis = camera_controller_yaw_basis * _camera_controller_node.camera.transform.basis
-			VRManager.vr_user_preferences.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
+			VRManager.vr_user_preferences_const.movement_orientation_enum.PLAYSPACE_ORIENTED_MOVEMENT:
 				basis = camera_controller_yaw_basis
-			VRManager.vr_user_preferences.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
+			VRManager.vr_user_preferences_const.movement_orientation_enum.HAND_ORIENTED_MOVEMENT:
 				basis = camera_controller_yaw_basis * _player_input.vr_locomotion_component.get_controller_direction()
 				
 	if using_flight_controls():
@@ -234,9 +235,9 @@ func entity_child_pre_remove(p_entity_child: Node) -> void:
 
 func get_attachment_node(p_attachment_id: int) -> Node:
 	match p_attachment_id:
-		_player_pickup_controller.LEFT_HAND_ID:
+		pickup_controller_const.LEFT_HAND_ID:
 			return _avatar_display.left_hand_bone_attachment
-		_player_pickup_controller.RIGHT_HAND_ID:
+		pickup_controller_const.RIGHT_HAND_ID:
 			return _avatar_display.right_hand_bone_attachment
 		_:
 			return _render_node
@@ -249,7 +250,7 @@ func get_player_pickup_controller() -> Node:
 func _setup_target() -> void:
 	_target_node = get_node_or_null(_target_node_path)
 	if _target_node:
-		if _target_node == self or not _target_node is Spatial:
+		if _target_node == self or not _target_node is Node3D:
 			_target_node = null
 		else:
 			# By default, kinematic body is not affected by its parent's movement
@@ -258,7 +259,7 @@ func _setup_target() -> void:
 			_target_smooth_node.process_priority = EntityManager.process_priority + 1
 
 			current_origin = get_global_transform().origin
-			_target_node.global_transform = Transform(Basis(), current_origin)
+			_target_node.global_transform = Transform3D(Basis(), current_origin)
 			#_target_smooth_node.global_transform = _target_node.global_transform
 		_target_smooth_node.teleport()
 
@@ -268,7 +269,7 @@ func _update_master_transform() -> void:
 		Vector3(0, 1, 0), _camera_controller_node.rotation_yaw
 	)
 	
-	set_transform(Transform(camera_controller_yaw_basis, get_origin()))
+	set_transform(Transform3D(camera_controller_yaw_basis, get_origin()))
 
 func _master_kinematic_integration_update(_delta: float) -> void:
 	move(movement_vector)
@@ -290,7 +291,7 @@ func _master_physics_update(p_delta: float) -> void:
 
 
 func _entity_physics_process(p_delta: float) -> void:
-	._entity_physics_process(p_delta)
+	super._entity_physics_process(p_delta)
 	
 	if _ik_space:
 		_ik_space.update_physics(p_delta)
@@ -316,7 +317,7 @@ func _entity_kinematic_integration_callback(p_delta: float) -> void:
 	
 
 func _entity_physics_post_process(p_delta: float) -> void:
-	._entity_physics_post_process(p_delta)
+	super._entity_physics_post_process(p_delta)
 
 
 func _master_representation_process(p_delta: float) -> void:
@@ -338,14 +339,14 @@ func _master_ready() -> void:
 	
 	### Avatar ###
 	_update_avatar(VSKPlayerManager.avatar_path)
-	assert(VSKPlayerManager.connect("avatar_path_changed", self, "_local_avatar_path_updated") == OK)
+	assert(VSKPlayerManager.connect("avatar_path_changed", self._local_avatar_path_updated) == OK)
 	###
 	
 	_player_input.setup_xr_camera()
 	
 	_player_teleport_controller.setup(self)
 	
-	assert(VSKDebugManager.connect("noclip_changed", self, "_noclip_changed") == OK)
+	assert(VSKDebugManager.connect("noclip_changed", self._noclip_changed) == OK)
 	
 	if _extended_kinematic_body:
 		_extended_kinematic_body.collision_layer = local_player_collision
@@ -367,12 +368,12 @@ func _puppet_ready() -> void:
 	_render_node.hide()
 	
 	if get_entity_node().network_logic_node:
-		assert(_ik_space.connect("external_trackers_changed", _render_node, "show", [], CONNECT_ONESHOT) == OK)
+		assert(_ik_space.connect("external_trackers_changed", Callable(_render_node, "show"), [], CONNECT_ONESHOT) == OK)
 	
 	_state_machine.start_state = NodePath("Networked")
 	
 	### Avatar ###
-	assert(VSKNetworkManager.connect("player_avatar_path_updated", self, "_player_avatar_path_updated") == OK)
+	assert(VSKNetworkManager.connect("player_avatar_path_updated", self._player_avatar_path_updated) == OK)
 	if VSKNetworkManager.player_avatar_paths.has(get_network_master()):
 		_update_avatar(VSKNetworkManager.player_avatar_paths[get_network_master()])
 	###
@@ -380,7 +381,7 @@ func _puppet_ready() -> void:
 	_free_master_nodes()
 
 func _entity_representation_process(p_delta: float) -> void:
-	._entity_representation_process(p_delta)
+	super._entity_representation_process(p_delta)
 	
 	if is_entity_master():
 		_master_representation_process(p_delta)
@@ -390,7 +391,7 @@ func _entity_representation_process(p_delta: float) -> void:
 	entity_node.network_logic_node.set_dirty(true)
 
 func _entity_ready() -> void:
-	._entity_ready()
+	super._entity_ready()
 	
 	# State machine
 	if ! is_entity_master():
@@ -412,8 +413,8 @@ func _entity_ready() -> void:
 	if _camera_controller_node:
 		_camera_controller_node.rotation_yaw = get_transform().basis.get_euler().y
 
-func _threaded_instance_setup(p_instance_id: int, p_network_reader: Reference) -> void:
-	._threaded_instance_setup(p_instance_id, p_network_reader)
+func _threaded_instance_setup(p_instance_id: int, p_network_reader: RefCounted) -> void:
+	super._threaded_instance_setup(p_instance_id, p_network_reader)
 	
 	_avatar_display._threaded_instance_setup()
 

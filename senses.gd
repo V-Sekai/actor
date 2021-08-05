@@ -1,16 +1,16 @@
 extends "res://addons/entity_manager/component_node.gd"
 
-const immediate_shapes_const = preload("res://addons/gdutil/immediate_shape_util.gd")
-const camera_matrix_const = preload("res://addons/gdutil/camera_matrix_util.gd")
-const geometry_util_const = preload("res://addons/gdutil/geometry_util.gd")
+const immediate_shapes_const = preload("res://addons/gd_util/immediate_shape_util.gd")
+const camera_matrix_const = preload("res://addons/gd_util/camera_matrix_util.gd")
+const geometry_util_const = preload("res://addons/gd_util/geometry_util.gd")
 
 # Virtual camera info
-var camera_matrix: camera_matrix_const = null
+var camera_matrix: Object = null
 var camera_planes: Array = []
 
 
-func get_actor_eye_transform() -> Transform:
-	return Transform()
+func get_actor_eye_transform() -> Transform3D:
+	return Transform3D()
 	#if camera_controller != null:
 	#	return camera_controller.global_transform
 	#else:
@@ -20,7 +20,7 @@ func get_actor_eye_transform() -> Transform:
 func can_see_collider_point(
 	p_point: Vector3, p_exclusion_array: Array = [], p_collision_bits: int = 1
 ) -> bool:
-	var dss: PhysicsDirectSpaceState = entity_node.PhysicsServer.space_get_direct_state(
+	var dss: PhysicsDirectSpaceState3D = entity_node.PhysicsServer3D.space_get_direct_state(
 		entity_node.get_world().get_space()
 	)
 	if dss:
@@ -32,14 +32,14 @@ func can_see_collider_point(
 			var result = dss.intersect_ray(
 				get_actor_eye_transform().origin, p_point, ray_exclusion_array, p_collision_bits
 			)
-			if result.empty():
+			if result.is_empty():
 				return true
 
 	return false
 
 
 func can_see_collider_aabb(p_aabb: AABB, p_exclusion_array: Array = [], p_collision_bits: int = 1) -> bool:
-	var dss = entity_node.PhysicsServer.space_get_direct_state(entity_node.get_world().get_space())
+	var dss = entity_node.PhysicsServer3D.space_get_direct_state(entity_node.get_world().get_space())
 	if dss:
 		camera_planes = camera_matrix.get_projection_planes(get_actor_eye_transform())
 
@@ -51,9 +51,9 @@ func can_see_collider_aabb(p_aabb: AABB, p_exclusion_array: Array = [], p_collis
 				p_aabb.position + (p_aabb.size * 0.5),
 				ray_exclusion_array,
 				p_collision_bits,
-				PhysicsDirectSpaceState.TYPE_MASK_COLLISION
+				PhysicsDirectSpaceState3D.TYPE_MASK_COLLISION
 			)
-			if result.empty():
+			if result.is_empty():
 				return true
 
 	return false

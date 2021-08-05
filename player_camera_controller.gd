@@ -1,8 +1,6 @@
 @tool
 extends Node3D
 
-const player_origin_const = preload("player_origin.tscn")
-
 var origin: Node3D = null
 var camera: Camera3D = null
 
@@ -109,7 +107,7 @@ func update_origin(p_origin_offset: Vector3) -> void:
 func setup_origin() -> void:
 	if get_tree().has_network_peer() and is_network_master():
 		if ! origin:
-			origin = player_origin_const.instantiate()
+			origin = load("res://addons/actor/player_origin.tscn").instantiate()
 			add_child(origin)
 			update_origin(origin_offset)
 

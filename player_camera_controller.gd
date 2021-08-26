@@ -75,8 +75,8 @@ func update() -> void:
 	if is_active and ! VRManager.is_xr_active():
 		corrected_pitch = clamp(rotation_pitch, rotation_pitch_min, rotation_pitch_max)
 
-	var pitch_basis:Basis = Basis.rotated(Vector3(-1.0, 0.0, 0.0), corrected_pitch)
-	var yaw_basis:Basis = Basis.rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw + rotation_yaw_snap_offset - PI)
+	var pitch_basis:Basis = Basis().rotated(Vector3(-1.0, 0.0, 0.0), corrected_pitch)
+	var yaw_basis:Basis = Basis().rotated(Vector3(0.0, 1.0, 0.0), rotation_yaw + rotation_yaw_snap_offset - PI)
 
 	transform.origin = Vector3()
 	transform.basis = yaw_basis

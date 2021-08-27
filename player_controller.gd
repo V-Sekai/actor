@@ -373,7 +373,7 @@ func _puppet_ready() -> void:
 	_state_machine.start_state = NodePath("Networked")
 	
 	### Avatar ###
-	assert(VSKNetworkManager.connect("player_avatar_path_updated", self._player_avatar_path_updated) == OK)
+	assert(VSKNetworkManager.connect("player_avatar_path_updated", self._player_network_avatar_path_updated) == OK)
 	if VSKNetworkManager.player_avatar_paths.has(get_network_master()):
 		_update_avatar(VSKNetworkManager.player_avatar_paths[get_network_master()])
 	###

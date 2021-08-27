@@ -107,7 +107,7 @@ func _entity_ready() -> void:
 	super._entity_ready()
 	
 	if _extended_kinematic_body:
-		_extended_kinematic_body.set_as_toplevel(true)
+		_extended_kinematic_body.set_as_top_level(true)
 		_extended_kinematic_body.global_transform = Transform3D(
 			Basis(), get_global_transform().origin
 		)

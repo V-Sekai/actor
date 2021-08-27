@@ -105,13 +105,13 @@ func update_origin(p_origin_offset: Vector3) -> void:
 
 
 func setup_origin() -> void:
-	if get_tree().has_network_peer() and is_network_master():
+	if get_tree().multiplayer.has_network_peer() and is_network_master():
 		if ! origin:
 			origin = load("res://addons/actor/player_origin.tscn").instantiate()
 			add_child(origin)
 			update_origin(origin_offset)
 
-			camera = origin.get_node_or_null("XRCamera")
+			camera = origin.get_node_or_null("ARVRCamera")
 			if camera:
 				camera.set_current(true)
 

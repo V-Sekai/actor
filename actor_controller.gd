@@ -8,7 +8,7 @@ var _state_machine: Node = null # state_machine_const
 
 # Render
 @export  var _third_person_render_node_path: NodePath = NodePath()
-@onready var _third_person_render_node: Node = get_node_or_null(_third_person_render_node_path)
+var _third_person_render_node: Node = null
 
 # Vector fed into the kinematic movement
 var velocity: Vector3 = Vector3() :
@@ -89,6 +89,7 @@ func cache_nodes() -> void:
 func _entity_ready() -> void:
 	super._entity_ready()
 
+	_third_person_render_node = get_node_or_null(_third_person_render_node_path)
 	_third_person_render_node.show()
 
 

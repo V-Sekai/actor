@@ -39,7 +39,7 @@ var _collider: CollisionShape3D = null
 @export  var local_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
 @export  var other_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
 
-@onready var physics_fps: int = ProjectSettings.get("physics/common/physics_fps")
+@onready var physics_fps: int = ProjectSettings.get("physics/common/physics_ticks_per_second")
 
 @export  var ik_space_path: NodePath = NodePath()
 var _ik_space: Node3D = null
@@ -254,8 +254,8 @@ func _setup_target() -> void:
 			_target_node = null
 		else:
 			# By default, kinematic body is not affected by its parent's movement
-			_target_node.set_as_toplevel(true)
-			_target_smooth_node.set_as_toplevel(true)
+			_target_node.set_as_top_level(true)
+			_target_smooth_node.set_as_top_level(true)
 			_target_smooth_node.process_priority = EntityManager.process_priority + 1
 
 			current_origin = get_global_transform().origin

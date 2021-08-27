@@ -21,7 +21,7 @@ func can_see_collider_point(
 	p_point: Vector3, p_exclusion_array: Array = [], p_collision_bits: int = 1
 ) -> bool:
 	var dss: PhysicsDirectSpaceState3D = entity_node.PhysicsServer3D.space_get_direct_state(
-		entity_node.get_world().get_space()
+		entity_node.get_world_3d().get_space()
 	)
 	if dss:
 		camera_planes = camera_matrix.get_projection_planes(get_actor_eye_transform())
@@ -39,7 +39,7 @@ func can_see_collider_point(
 
 
 func can_see_collider_aabb(p_aabb: AABB, p_exclusion_array: Array = [], p_collision_bits: int = 1) -> bool:
-	var dss = entity_node.PhysicsServer3D.space_get_direct_state(entity_node.get_world().get_space())
+	var dss = entity_node.PhysicsServer3D.space_get_direct_state(entity_node.get_world_3d().get_space())
 	if dss:
 		camera_planes = camera_matrix.get_projection_planes(get_actor_eye_transform())
 

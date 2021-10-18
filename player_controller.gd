@@ -70,12 +70,12 @@ func _update_avatar(p_path: String) -> void:
 	_avatar_loader.load_model(false, false)
 
 func _player_network_avatar_path_updated(p_network_id: int, p_path: String) -> void:
-	if get_network_master() == p_network_id:
-		VSKNetworkManager.update_player_avatar_path(get_network_master(), p_path)
+	if get_multiplayer_authority() == p_network_id:
+		VSKNetworkManager.update_player_avatar_path(get_multiplayer_authority(), p_path)
 		_update_avatar(p_path)
 
 func _on_rpc_avatar_path_updated(p_path):
-	VSKNetworkManager.update_player_avatar_path(get_network_master(), p_path)
+	VSKNetworkManager.update_player_avatar_path(get_multiplayer_authority(), p_path)
 	_update_avatar(p_path)
 
 func _local_avatar_path_updated(p_path: String) -> void:
@@ -225,7 +225,7 @@ func _get_desired_direction() -> Basis:
 
 func _on_touched_by_body(p_body) -> void:
 	if p_body.has_method("touched_by_body_with_network_id"):
-		p_body.touched_by_body_with_network_id(get_network_master())
+		p_body.touched_by_body_with_network_id(get_multiplayer_authority())
 
 
 func entity_child_pre_remove(p_entity_child: Node) -> void:
@@ -374,8 +374,8 @@ func _puppet_ready() -> void:
 	
 	### Avatar ###
 	assert(VSKNetworkManager.connect("player_avatar_path_updated", self._player_network_avatar_path_updated) == OK)
-	if VSKNetworkManager.player_avatar_paths.has(get_network_master()):
-		_update_avatar(VSKNetworkManager.player_avatar_paths[get_network_master()])
+	if VSKNetworkManager.player_avatar_paths.has(get_multiplayer_authority()):
+		_update_avatar(VSKNetworkManager.player_avatar_paths[get_multiplayer_authority()])
 	###
 	
 	_free_master_nodes()

@@ -105,7 +105,7 @@ func update_origin(p_origin_offset: Vector3) -> void:
 
 
 func setup_origin() -> void:
-	if get_tree().multiplayer.has_network_peer() and is_multiplayer_authority():
+	if get_tree().multiplayer.has_multiplayer_peer() and is_multiplayer_authority():
 		if ! origin:
 			origin = load("res://addons/actor/player_origin.tscn").instantiate()
 			add_child(origin)

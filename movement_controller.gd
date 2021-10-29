@@ -59,7 +59,8 @@ func get_direction_normal() -> Vector3:
 func move(p_target_velocity: Vector3) -> void:
 	if _extended_kinematic_body:
 		if p_target_velocity.length() > 0.0:
-			motion_vector = _extended_kinematic_body.extended_move(p_target_velocity, MAX_SLIDE_ATTEMPTS)
+			if _extended_kinematic_body:
+				motion_vector = _extended_kinematic_body.extended_move(p_target_velocity, MAX_SLIDE_ATTEMPTS)
 			set_global_transform(
 				Transform3D(
 					get_global_transform().basis, _extended_kinematic_body.global_transform.origin

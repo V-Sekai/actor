@@ -39,7 +39,7 @@ var _collider: CollisionShape3D = null
 @export  var local_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
 @export  var other_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
 
-@onready var physics_fps: int = ProjectSettings.get("physics/common/physics_ticks_per_second")
+@onready var physics_fps: int = ProjectSettings.get_setting("physics/common/physics_ticks_per_second")
 
 @export  var ik_space_path: NodePath = NodePath()
 var _ik_space: Node3D = null

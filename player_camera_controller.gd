@@ -37,7 +37,14 @@ var origin_offset: Vector3 = Vector3()
 signal camera_mode_changed(p_camera_mode)
 
 func test_collision_point(p_ds: PhysicsDirectSpaceState3D, p_distance: float, p_start: Vector3, p_end: Vector3) -> float:
-	var result = p_ds.intersect_ray(p_start, p_end, [get_parent().global_transform.origin], camera_clip_layers, true, false)
+	var param : PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
+	param.from = p_start
+	param.to = p_end
+	param.exclude = [get_parent().global_transform.origin]
+	param.collision_mask = camera_clip_layers
+	param.collide_with_bodies = true
+	param.collide_with_areas = false
+	var result = p_ds.intersect_ray(param)
 	if(!result.is_empty()):
 		var new_distance = p_start.distance_to(result.position)
 		if(new_distance < p_distance):

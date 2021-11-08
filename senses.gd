@@ -29,9 +29,12 @@ func can_see_collider_point(
 		if geometry_util_const.test_point_with_planes(p_point, camera_planes):
 			var ray_exclusion_array = p_exclusion_array
 			ray_exclusion_array.push_front(self)
-			var result = dss.intersect_ray(
-				get_actor_eye_transform().origin, p_point, ray_exclusion_array, p_collision_bits
-			)
+			var param : PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
+			param.from = get_actor_eye_transform().origin
+			param.to = p_point
+			param.exclude = ray_exclusion_array
+			param.collision_mask = p_collision_bits
+			var result = dss.intersect_ray(param)
 			if result.is_empty():
 				return true
 
@@ -46,13 +49,14 @@ func can_see_collider_aabb(p_aabb: AABB, p_exclusion_array: Array = [], p_collis
 		if geometry_util_const.test_aabb_with_planes(p_aabb, camera_planes):
 			var ray_exclusion_array = p_exclusion_array
 			ray_exclusion_array.push_front(self)
-			var result = dss.intersect_ray(
-				get_actor_eye_transform().origin,
-				p_aabb.position + (p_aabb.size * 0.5),
-				ray_exclusion_array,
-				p_collision_bits,
-				PhysicsDirectSpaceState3D.TYPE_MASK_COLLISION
-			)
+			
+			var param : PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
+			param.from = get_actor_eye_transform().origin
+			param.to = p_aabb.position + (p_aabb.size * 0.5)
+			param.exclude = ray_exclusion_array
+			param.collision_mask = p_collision_bits
+			param.collide_with_bodies = PhysicsDirectSpaceState3D.TYPE_MASK_COLLISION
+			var result = dss.intersect_ray(param)
 			if result.is_empty():
 				return true
 

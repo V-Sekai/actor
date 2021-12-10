@@ -1,7 +1,7 @@
 @tool
 extends "res://addons/actor/movement_controller.gd" # movement_controller.gd
 
-const state_machine_const = preload("addons/actor/actor_state_machine.gd")
+const state_machine_const = preload("res://addons/actor/actor_state_machine.gd")
 
 @export  var _state_machine_path: NodePath = NodePath()
 var _state_machine: Node = null # state_machine_const

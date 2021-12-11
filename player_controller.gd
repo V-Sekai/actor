@@ -71,11 +71,11 @@ func _update_avatar(p_path: String) -> void:
 
 func _player_network_avatar_path_updated(p_network_id: int, p_path: String) -> void:
 	if get_multiplayer_authority() == p_network_id:
-		VSKNetworkManager.update_player_avatar_path(get_multiplayer_authority(), p_path)
+		NetworkManager.update_player_avatar_path(get_multiplayer_authority(), p_path)
 		_update_avatar(p_path)
 
 func _on_rpc_avatar_path_updated(p_path):
-	VSKNetworkManager.update_player_avatar_path(get_multiplayer_authority(), p_path)
+	NetworkManager.update_player_avatar_path(get_multiplayer_authority(), p_path)
 	_update_avatar(p_path)
 
 func _local_avatar_path_updated(p_path: String) -> void:
@@ -373,9 +373,9 @@ func _puppet_ready() -> void:
 	_state_machine.start_state = NodePath("Networked")
 	
 	### Avatar ###
-	assert(VSKNetworkManager.connect("player_avatar_path_updated", self._player_network_avatar_path_updated) == OK)
-	if VSKNetworkManager.player_avatar_paths.has(get_multiplayer_authority()):
-		_update_avatar(VSKNetworkManager.player_avatar_paths[get_multiplayer_authority()])
+	assert(NetworkManager.connect("player_avatar_path_updated", self._player_network_avatar_path_updated) == OK)
+	if NetworkManager.player_avatar_paths.has(get_multiplayer_authority()):
+		_update_avatar(NetworkManager.player_avatar_paths[get_multiplayer_authority()])
 	###
 	
 	_free_master_nodes()

@@ -5,49 +5,49 @@ extends "res://addons/actor/actor_controller.gd" # actor_controller.gd
 const vr_manager_const = preload("res://addons/sar1_vr_manager/vr_manager.gd")
 const pickup_controller_const = preload("res://addons/vsk_entities/extensions/pickup_controller.gd")
 
-@export  var _target_node_path: NodePath = NodePath()
+@export var _target_node_path: NodePath = NodePath()
 @onready var _target_node: Node3D = get_node_or_null(_target_node_path)
 
-@export  var _target_smooth_node_path: NodePath = NodePath()
+@export var _target_smooth_node_path: NodePath = NodePath()
 @onready var _target_smooth_node: Node3D = get_node_or_null(_target_smooth_node_path)
 
-@export  var _camera_controller_node_path: NodePath = NodePath()
+@export var _camera_controller_node_path: NodePath = NodePath()
 @onready var _camera_controller_node: Node3D = get_node_or_null(_camera_controller_node_path)
 
-@export  var _player_input_path: NodePath = NodePath()
+@export var _player_input_path: NodePath = NodePath()
 @onready var _player_input: Node = get_node_or_null(_player_input_path)
 
-@export  var _player_interaction_controller_path: NodePath = NodePath()
+@export var _player_interaction_controller_path: NodePath = NodePath()
 var _player_interaction_controller: Node = null
 
-@export  var _player_pickup_controller_path: NodePath = NodePath()
+@export var _player_pickup_controller_path: NodePath = NodePath()
 var _player_pickup_controller: Node = null
 
-@export  var _player_teleport_controller_path: NodePath = NodePath()
+@export var _player_teleport_controller_path: NodePath = NodePath()
 var _player_teleport_controller: Node = null
 
-@export  var _player_info_tag_controller_path: NodePath = NodePath()
+@export var _player_info_tag_controller_path: NodePath = NodePath()
 var _player_info_tag_controller: Node = null
 
-@export  var _player_hand_controller_path: NodePath = NodePath()
+@export var _player_hand_controller_path: NodePath = NodePath()
 var _player_hand_controller: Node = null
 
-@export  var _collider_path: NodePath = NodePath()
+@export var _collider_path: NodePath = NodePath()
 var _collider: CollisionShape3D = null
 
 
-@export  var local_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
-@export  var other_player_collision: int = 1 # (int, LAYERS_3D_PHYSICS)
+@export_flags_3d_physics  var local_player_collision: int = 1
+@export_flags_3d_physics  var other_player_collision: int = 1
 
 @onready var physics_fps: int = ProjectSettings.get_setting("physics/common/physics_ticks_per_second")
 
-@export  var ik_space_path: NodePath = NodePath()
+@export var ik_space_path: NodePath = NodePath()
 var _ik_space: Node3D = null
 
-@export  var avatar_loader_path: NodePath = NodePath()
+@export var avatar_loader_path: NodePath = NodePath()
 var _avatar_loader: Node = null
 
-@export  var avatar_display_path: NodePath = NodePath()
+@export var avatar_display_path: NodePath = NodePath()
 var _avatar_display: Node3D = null
 
 # The offset between the camera position and ARVROrigin center (none transformed)

@@ -6,7 +6,7 @@ const MAX_SLIDE_ATTEMPTS = 4
 const controller_helpers_const = preload("controller_helpers.gd")
 
 const extended_kinematic_body_const = preload("res://addons/extended_kinematic_body/extended_kinematic_body.gd")
-@export  var _extended_kinematic_body_path: NodePath # (NodePath) = NodePath()
+@export var _extended_kinematic_body_path: NodePath = NodePath()
 var _extended_kinematic_body: CharacterBody3D = null: # extended_kinematic_body_const
 	set = set_kinematic_body,
 	get = get_kinematic_body

@@ -4,8 +4,8 @@ extends Node3D
 var origin: Node3D = null
 var camera: Camera3D = null
 
-@export  var is_active: bool # (bool) = true
-@export  var camera_clip_layers: int # (int, LAYERS_3D_PHYSICS) = 1
+@export var is_active: bool = true
+@export_flags_3d_physics var camera_clip_layers: int = 1
 
 # Camera mode
 const CAMERA_FIRST_PERSON=0

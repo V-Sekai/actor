@@ -3,11 +3,11 @@ extends "res://addons/actor/movement_controller.gd" # movement_controller.gd
 
 const state_machine_const = preload("actor_state_machine.gd")
 
-@export  var _state_machine_path: NodePath = NodePath()
+@export var _state_machine_path: NodePath = NodePath()
 var _state_machine: Node = null # state_machine_const
 
 # Render
-@export  var _third_person_render_node_path: NodePath = NodePath()
+@export var _third_person_render_node_path: NodePath = NodePath()
 var _third_person_render_node: Node = null
 
 # Vector fed into the kinematic movement
@@ -28,15 +28,15 @@ func get_velocity() -> Vector3:
 #
 
 # Movement stats
-@export  var sprint_speed: float = 10.0:
+@export var sprint_speed: float = 10.0:
 	set = set_sprint_speed,
 	get = get_sprint_speed
 
-@export  var walk_speed: float = 5.0:
+@export var walk_speed: float = 5.0:
 	set = set_walk_speed,
 	get = get_walk_speed
 
-@export  var fly_speed: float = 10.0:
+@export var fly_speed: float = 10.0:
 	set = set_fly_speed,
 	get = get_fly_speed
 
@@ -66,7 +66,7 @@ func get_fly_speed() -> float:
 	return fly_speed
 
 # Render
-@export  var _render_node_path: NodePath # (NodePath) = NodePath()
+@export var _render_node_path: NodePath = NodePath()
 var _render_node: Node3D = null
 
 #var skeleton = null : Spatial

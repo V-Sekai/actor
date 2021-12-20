@@ -1,7 +1,7 @@
 @tool
 extends "res://addons/state_machine/state_machine.gd"
 
-@export  var actor_controller_path : NodePath = NodePath()
+@export var actor_controller_path : NodePath = NodePath()
 var actor_controller: Node = null # of type actor_controller.gd
 
 var noclip: bool = false

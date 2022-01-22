@@ -115,7 +115,7 @@ func setup_origin() -> void:
 	if get_tree().multiplayer.has_multiplayer_peer() and is_multiplayer_authority():
 		if ! origin:
 			origin = load("res://addons/actor/player_origin.tscn").instantiate()
-			add_child(origin)
+			add_child(origin, true)
 			update_origin(origin_offset)
 
 			camera = origin.get_node_or_null("ARVRCamera")

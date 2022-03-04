@@ -7,7 +7,7 @@ func locomotion() -> void:
 	else:
 		pass
 	
-	if ! state_machine.is_grounded():
+	if !state_machine.is_grounded():
 		change_state("Falling")
 		return
 

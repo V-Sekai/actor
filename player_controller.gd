@@ -348,14 +348,14 @@ func _master_ready() -> void:
 	
 	assert(VSKDebugManager.connect("noclip_changed", self._noclip_changed) == OK)
 	
-	if _extended_kinematic_body:
-		_extended_kinematic_body.collision_layer = local_player_collision
+	if _character_body:
+		_character_body.collision_layer = local_player_collision
 	
 func _free_master_nodes() -> void:
-	if _extended_kinematic_body:
-		_extended_kinematic_body.queue_free()
-		_extended_kinematic_body.get_parent().remove_child(_extended_kinematic_body)
-		_extended_kinematic_body = null
+	if _character_body:
+		_character_body.queue_free()
+		_character_body.get_parent().remove_child(_character_body)
+		_character_body = null
 		
 	if _camera_controller_node:
 		_camera_controller_node.queue_free()

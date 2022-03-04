@@ -5,11 +5,10 @@ const MAX_SLIDE_ATTEMPTS = 4
 
 const controller_helpers_const = preload("res://addons/actor/controller_helpers.gd")
 
-const extended_kinematic_body_const = preload("res://addons/extended_kinematic_body/extended_kinematic_body.gd")
-@export var _extended_kinematic_body_path: NodePath = NodePath()
-var _extended_kinematic_body: CharacterBody3D = null: # extended_kinematic_body_const
-	set = set_kinematic_body,
-	get = get_kinematic_body
+@export var _character_body_path: NodePath = NodePath()
+var _character_body: CharacterBody3D = null:
+	set = set_character_body,
+	get = get_character_body
 
 
 var motion_vector: Vector3 = Vector3()
@@ -18,30 +17,30 @@ var movement_vector: Vector3 = Vector3() # Movement for this frame
 func set_global_origin(p_origin: Vector3, _p_update_physics: bool = false) -> void:
 	super.set_global_origin(p_origin, _p_update_physics)
 	if _p_update_physics:
-		if _extended_kinematic_body and _extended_kinematic_body.is_inside_tree():
-			_extended_kinematic_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
+		if _character_body and _character_body.is_inside_tree():
+			_character_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
 
 
 func set_transform(p_transform: Transform3D, _p_update_physics: bool = false) -> void:
 	super.set_transform(p_transform, _p_update_physics)
 	if _p_update_physics:
-		if _extended_kinematic_body and _extended_kinematic_body.is_inside_tree():
-			_extended_kinematic_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
+		if _character_body and _character_body.is_inside_tree():
+			_character_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
 
 
 func set_global_transform(p_global_transform: Transform3D, _p_update_physics: bool = false) -> void:
 	super.set_global_transform(p_global_transform, _p_update_physics)
 	if _p_update_physics:
-		if _extended_kinematic_body and _extended_kinematic_body.is_inside_tree():
-			_extended_kinematic_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
+		if _character_body and _character_body.is_inside_tree():
+			_character_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
 
 
-func set_kinematic_body(p_extended_kinematic_body: CharacterBody3D) -> void: # extended_kinematic_body_const
-	_extended_kinematic_body = p_extended_kinematic_body
+func set_character_body(p_character_body: CharacterBody3D) -> void:
+	_character_body = p_character_body
 
 
-func get_kinematic_body() -> CharacterBody3D: # extended_kinematic_body_const
-	return _extended_kinematic_body
+func get_character_body() -> CharacterBody3D:
+	return _character_body
 
 
 func set_direction_normal(p_normal: Vector3) -> void:
@@ -57,13 +56,15 @@ func get_direction_normal() -> Vector3:
 
 
 func move(p_target_velocity: Vector3) -> void:
-	if _extended_kinematic_body:
+	if _character_body:
 		if p_target_velocity.length() > 0.0:
-			if _extended_kinematic_body:
-				motion_vector = _extended_kinematic_body.extended_move(p_target_velocity, MAX_SLIDE_ATTEMPTS)
+			if _character_body:
+				_character_body.velocity = p_target_velocity
+				_character_body.move_and_slide()
+				motion_vector = _character_body.velocity
 			set_global_transform(
 				Transform3D(
-					get_global_transform().basis, _extended_kinematic_body.global_transform.origin
+					get_global_transform().basis, _character_body.global_transform.origin
 				)
 			)
 
@@ -73,15 +74,10 @@ func set_movement_vector(p_target_velocity: Vector3) -> void:
 	
 	
 func is_grounded() -> bool:
-	if _extended_kinematic_body:
-		return _extended_kinematic_body.is_grounded
+	if _character_body:
+		return _character_body.is_on_floor()
 	else:
 		return false
-
-
-func set_grounded(p_is_grounded: bool) -> void:
-	if _extended_kinematic_body:
-		_extended_kinematic_body.is_grounded = p_is_grounded
 
 
 func get_gravity_speed() -> float:
@@ -95,20 +91,20 @@ func get_gravity_direction() -> Vector3:
 func cache_nodes() -> void:
 	super.cache_nodes()
 
-	if has_node(_extended_kinematic_body_path):
-		_extended_kinematic_body = get_node_or_null(_extended_kinematic_body_path)
+	if has_node(_character_body_path):
+		_character_body = get_node_or_null(_character_body_path)
 
 		if (
-			_extended_kinematic_body == self
-			or not _extended_kinematic_body is extended_kinematic_body_const
+			_character_body == self
+			or not _character_body is CharacterBody3D
 		):
-			_extended_kinematic_body = null
+			_character_body = null
 
 func _entity_ready() -> void:
 	super._entity_ready()
 	
-	if _extended_kinematic_body:
-		_extended_kinematic_body.set_as_top_level(true)
-		_extended_kinematic_body.global_transform = Transform3D(
+	if _character_body:
+		_character_body.set_as_top_level(true)
+		_character_body.global_transform = Transform3D(
 			Basis(), get_global_transform().origin
 		)

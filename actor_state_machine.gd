@@ -66,10 +66,6 @@ func is_grounded() -> bool:
 	return get_actor_controller().is_grounded()
 	
 
-func set_grounded(p_grounded: bool) -> void:
-	get_actor_controller().set_grounded(p_grounded)
-
-
 func get_velocity() -> Vector3:
 	return get_actor_controller().get_velocity()
 

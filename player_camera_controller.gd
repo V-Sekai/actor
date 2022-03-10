@@ -76,7 +76,7 @@ func get_camera_clip_distance(_camera) -> float:
 func update() -> void:
 	if InputManager.is_ingame_action_just_pressed("toggle_camera_mode"):
 		camera_mode = CAMERA_THIRD_PERSON if camera_mode == CAMERA_FIRST_PERSON else CAMERA_FIRST_PERSON
-		emit_signal("camera_mode_changed", camera_mode)
+		camera_mode_changed.emit(camera_mode)
 	
 	var corrected_pitch: float = 0.0
 	if is_active and ! VRManager.is_xr_active():

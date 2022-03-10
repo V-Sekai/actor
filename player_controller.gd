@@ -339,14 +339,14 @@ func _master_ready() -> void:
 	
 	### Avatar ###
 	_update_avatar(VSKPlayerManager.avatar_path)
-	assert(VSKPlayerManager.connect("avatar_path_changed", self._local_avatar_path_updated) == OK)
+	assert(VSKPlayerManager.avatar_path_changed.connect(self._local_avatar_path_updated) == OK)
 	###
 	
 	_player_input.setup_xr_camera()
 	
 	_player_teleport_controller.setup(self)
 	
-	assert(VSKDebugManager.connect("noclip_changed", self._noclip_changed) == OK)
+	assert(VSKDebugManager.noclip_changed.connect(self._noclip_changed) == OK)
 	
 	if _character_body:
 		_character_body.collision_layer = local_player_collision
@@ -368,12 +368,12 @@ func _puppet_ready() -> void:
 	_render_node.hide()
 	
 	if get_entity_node().network_logic_node:
-		assert(_ik_space.connect("external_trackers_changed", Callable(_render_node, "show"), [], CONNECT_ONESHOT) == OK)
+		assert(_ik_space.external_trackers_changed.connect(_render_node.show, CONNECT_ONESHOT) == OK)
 	
 	_state_machine.start_state = NodePath("Networked")
 	
 	### Avatar ###
-	assert(NetworkManager.connect("player_avatar_path_updated", self._player_network_avatar_path_updated) == OK)
+	assert(NetworkManager.player_avatar_path_updated.connect(self._player_network_avatar_path_updated) == OK)
 	if NetworkManager.player_avatar_paths.has(get_multiplayer_authority()):
 		_update_avatar(NetworkManager.player_avatar_paths[get_multiplayer_authority()])
 	###

@@ -58,7 +58,7 @@ func translate_third_person_camera(p_distance: float, p_corrected_pitch: float) 
 	translate(Vector3(0.0, 1.0, 0.0) * p_distance * sin(p_corrected_pitch))
 
 func get_camera_clip_distance(_camera) -> float:
-	var ds: PhysicsDirectSpaceState3D = PhysicsServer3D.space_get_direct_state(get_world_3d().get_space())
+	#var ds: PhysicsDirectSpaceState3D = PhysicsServer3D.space_get_direct_state(get_world_3d().get_space())
 	
 	var collision_distance = distance
 	var start_transform: Transform3D = get_parent().get_global_transform()
@@ -69,7 +69,8 @@ func get_camera_clip_distance(_camera) -> float:
 	#var bottom_left = end_transform.origin - p_camera.project_position(Vector2(0.0, OS.get_window_size().y), 0.0)
 	#var bottom_right = end_transform.origin - p_camera.project_position(Vector2(OS.get_window_size().x, OS.get_window_size().y), 0.0)
 	
-	collision_distance = test_collision_point(ds, collision_distance, start_transform.origin, end_transform.origin)
+	# Saracen: bug, can't do collision test because I can't access DirectPhysicsSpace for some reason
+	#collision_distance = test_collision_point(ds, collision_distance, start_transform.origin, end_transform.origin)
 	
 	return collision_distance
 

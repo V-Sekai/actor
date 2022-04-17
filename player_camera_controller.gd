@@ -61,8 +61,8 @@ func get_camera_clip_distance(_camera) -> float:
 	#var ds: PhysicsDirectSpaceState3D = PhysicsServer3D.space_get_direct_state(get_world_3d().get_space())
 	
 	var collision_distance = distance
-	var start_transform: Transform3D = get_parent().get_global_transform()
-	var end_transform = get_global_transform()
+	#var start_transform: Transform3D = get_parent().get_global_transform()
+	#var end_transform = get_global_transform()
 	
 	#var upper_left = end_transform.origin - p_camera.project_position(Vector2(0.0, 0.0), 0.0)
 	#var upper_right = end_transform.origin - p_camera.project_position(Vector2(OS.get_window_size().x, 0.0), 0.0)

@@ -157,7 +157,7 @@ func move(p_movement_vector: Vector3) -> void:
 
 
 func _on_target_smooth_transform_complete(p_delta) -> void:
-	if _ik_space:
+	if _ik_space and _ik_space.has_method("transform_update"):
 		_ik_space.transform_update(p_delta)
 
 
@@ -292,7 +292,7 @@ func _master_physics_update(p_delta: float) -> void:
 func _entity_physics_process(p_delta: float) -> void:
 	._entity_physics_process(p_delta)
 	
-	if _ik_space:
+	if _ik_space and _ik_space.has_method("update_physics"): 
 		_ik_space.update_physics(p_delta)
 	
 	if is_entity_master():
@@ -402,8 +402,8 @@ func _entity_ready() -> void:
 	_player_hand_controller.setup(self)
 	
 	_state_machine.start()
-	
-	_ik_space._entity_ready()
+	if _ik_space.has_method("_entity_ready"):
+		_ik_space._entity_ready()
 	_avatar_display._entity_ready()
 
 	_setup_target()

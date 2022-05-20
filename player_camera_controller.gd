@@ -134,7 +134,6 @@ func _exit_tree() -> void:
 
 		if origin:
 			origin.queue_free()
-			origin.get_parent().remove_child(origin)
 
 		if is_in_group("camera_controllers"):
 			remove_from_group("camera_controllers")

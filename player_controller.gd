@@ -354,13 +354,9 @@ func _master_ready() -> void:
 func _free_master_nodes() -> void:
 	if _character_body:
 		_character_body.queue_free()
-		_character_body.get_parent().remove_child(_character_body)
-		_character_body = null
 		
 	if _camera_controller_node:
 		_camera_controller_node.queue_free()
-		_camera_controller_node.get_parent().remove_child(_camera_controller_node)
-		_camera_controller_node = null
 	
 func _puppet_ready() -> void:
 	# Callback for when the first packet is received. If this entity is not

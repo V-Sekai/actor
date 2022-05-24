@@ -18,21 +18,14 @@ func set_global_origin(p_origin: Vector3, _p_update_physics: bool = false) -> vo
 	super.set_global_origin(p_origin, _p_update_physics)
 	if _p_update_physics:
 		if _character_body and _character_body.is_inside_tree():
-			_character_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
-
-
-func set_transform(p_transform: Transform3D, _p_update_physics: bool = false) -> void:
-	super.set_transform(p_transform, _p_update_physics)
-	if _p_update_physics:
-		if _character_body and _character_body.is_inside_tree():
-			_character_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
+			_character_body.global_translate(get_global_origin())
 
 
 func set_global_transform(p_global_transform: Transform3D, _p_update_physics: bool = false) -> void:
 	super.set_global_transform(p_global_transform, _p_update_physics)
 	if _p_update_physics:
 		if _character_body and _character_body.is_inside_tree():
-			_character_body.set_global_transform(Transform3D(Basis(), get_global_origin()))
+			_character_body.global_translate(get_global_origin())
 
 
 func set_character_body(p_character_body: CharacterBody3D) -> void:

@@ -12,32 +12,32 @@
 [ext_resource type="Script" path="res://addons/actor/states/actor_state_noclip.gd" id="10"]
 
 [node name="ActorStateMachine" type="Node"]
-script = ExtResource( "1" )
+script = ExtResource("1")
 start_state = NodePath("Spawned")
 
 [node name="Spawned" type="Node" parent="."]
-script = ExtResource( "2" )
+script = ExtResource("2")
 
 [node name="Idle" type="Node" parent="."]
-script = ExtResource( "3" )
+script = ExtResource("3")
 
 [node name="Landed" type="Node" parent="."]
-script = ExtResource( "7" )
+script = ExtResource("7")
 
 [node name="Locomotion" type="Node" parent="."]
-script = ExtResource( "5" )
+script = ExtResource("5")
 
 [node name="Falling" type="Node" parent="."]
-script = ExtResource( "4" )
+script = ExtResource("4")
 
 [node name="Stop" type="Node" parent="."]
-script = ExtResource( "6" )
+script = ExtResource("6")
 
 [node name="Pre-Jump" type="Node" parent="."]
-script = ExtResource( "9" )
+script = ExtResource("9")
 
 [node name="Networked" type="Node" parent="."]
-script = ExtResource( "8" )
+script = ExtResource("8")
 
 [node name="Noclip" type="Node" parent="."]
-script = ExtResource( "10" )
+script = ExtResource("10")

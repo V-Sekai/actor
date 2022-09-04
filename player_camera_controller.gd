@@ -29,8 +29,8 @@ var rotation_pitch: float = 0.0 # radians
 # Used to provide representation interpolation for snapping
 var rotation_yaw_snap_offset: float = 0.0 # radians
 
-var rotation_pitch_min: float = deg2rad(-89.5)
-var rotation_pitch_max: float = deg2rad(89.5)
+var rotation_pitch_min: float = deg_to_rad(-89.5)
+var rotation_pitch_max: float = deg_to_rad(89.5)
 
 var origin_offset: Vector3 = Vector3()
 

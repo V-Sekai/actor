@@ -364,7 +364,7 @@ func _puppet_ready() -> void:
 	_render_node.hide()
 	
 	if get_entity_node().network_logic_node:
-		assert(_ik_space.external_trackers_changed.connect(_render_node.show, CONNECT_ONESHOT) == OK)
+		assert(_ik_space.external_trackers_changed.connect(_render_node.show, CONNECT_ONE_SHOT) == OK)
 	
 	_state_machine.start_state = NodePath("Networked")
 	

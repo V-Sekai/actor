@@ -1,5 +1,5 @@
 @tool
-extends "res://addons/actor/actor_controller.gd" # actor_controller.gd
+extends "res://addons/actor/actor_controller.gd"
 
 # Consts
 const vr_manager_const = preload("res://addons/sar1_vr_manager/vr_manager.gd")
@@ -178,6 +178,7 @@ func cache_nodes() -> void:
 	_ik_space = get_node_or_null(ik_space_path)
 
 	_avatar_display = get_node_or_null(avatar_display_path)
+
 	_avatar_display.simulation_logic = self
 	
 	_avatar_loader = get_node_or_null(avatar_loader_path)
@@ -283,8 +284,9 @@ func _master_physics_update(p_delta: float) -> void:
 	if _player_teleport_controller:
 		_player_teleport_controller.check_respawn_bounds()
 		_player_teleport_controller.check_teleport()
-		
-	_player_interaction_controller.update(get_entity_node(), p_delta)
+	
+	if _player_interaction_controller.has_method("update"):
+		_player_interaction_controller.update(get_entity_node(), p_delta)
 	
 	_master_movement(p_delta)
 	_update_master_transform()

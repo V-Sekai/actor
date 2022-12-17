@@ -83,7 +83,7 @@ func can_see_collider_aabb(p_aabb: AABB, p_exclusion_array: Array = [], p_collis
 			param.to = p_aabb.position + (p_aabb.size * 0.5)
 			param.exclude = ray_exclusion_array
 			param.collision_mask = p_collision_bits
-			param.collide_with_bodies = PhysicsDirectSpaceState3D.TYPE_MASK_COLLISION
+			param.collide_with_bodies = true
 			var result = dss.intersect_ray(param)
 			if result.is_empty():
 				return true

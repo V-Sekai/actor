@@ -26,7 +26,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-extends "res://addons/actor/states/actor_state.gd" # actor_state.gd
+extends "res://addons/actor/states/actor_state.gd"  # actor_state.gd
 
 
 func enter() -> void:

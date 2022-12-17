@@ -26,16 +26,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-extends "res://addons/actor/states/actor_state.gd" # actor_state.gd
+extends "res://addons/actor/states/actor_state.gd"  # actor_state.gd
 
 
 func enter() -> void:
-	state_machine.set_velocity(
-		(
-			Vector3()
-		)
-	)
-	
+	state_machine.set_velocity(Vector3())
+
 	if state_machine.is_noclipping():
 		change_state("Noclip")
 	else:
@@ -57,7 +53,7 @@ func update(_delta: float) -> void:
 		elif state_machine.is_attempting_jumping():
 			change_state("Pre-Jump")
 			return
-			
+
 		state_machine.set_movement_vector(state_machine.get_velocity())
 
 

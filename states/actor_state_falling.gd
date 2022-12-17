@@ -26,7 +26,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-extends "res://addons/actor/states/actor_state.gd" # actor_state.gd
+extends "res://addons/actor/states/actor_state.gd"  # actor_state.gd
 
 
 func enter() -> void:
@@ -39,13 +39,11 @@ func update(p_delta: float) -> void:
 	else:
 		if state_machine.is_grounded():
 			change_state("Landed")
-		
+
 		var gravity_delta: float = state_machine.get_actor_controller().get_gravity_speed() * p_delta
 		var gravity_direction: Vector3 = state_machine.get_actor_controller().get_gravity_direction()
 
-		state_machine.set_velocity(
-			state_machine.get_velocity() + gravity_direction * gravity_delta
-		)
+		state_machine.set_velocity(state_machine.get_velocity() + gravity_direction * gravity_delta)
 		state_machine.set_movement_vector(state_machine.get_velocity())
 
 

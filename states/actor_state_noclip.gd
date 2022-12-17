@@ -26,31 +26,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-extends "res://addons/actor/states/actor_state.gd" # actor_state.gd
+extends "res://addons/actor/states/actor_state.gd"  # actor_state.gd
+
 
 func locomotion() -> void:
 	var input_direction: Vector3 = state_machine.get_input_direction()
 
-	var velocity: Vector3 = input_direction * state_machine.get_input_magnitude()	
+	var velocity: Vector3 = input_direction * state_machine.get_input_magnitude()
 	velocity += Vector3.UP * state_machine.get_vertical_input()
 	velocity = velocity.normalized()
-		
+
 	velocity *= state_machine.actor_controller.fly_speed
 
 	state_machine.set_velocity(velocity)
-	
+
 	state_machine.set_movement_vector(state_machine.get_velocity())
+
 
 func enter() -> void:
 	if !state_machine.is_noclipping():
 		change_state("Falling")
+
 
 func update(_delta: float) -> void:
 	if !state_machine.is_noclipping():
 		change_state("Falling")
 	else:
 		locomotion()
-
 
 
 func exit() -> void:

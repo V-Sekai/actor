@@ -38,9 +38,9 @@ var _character_body: CharacterBody3D = null:
 	set = set_character_body,
 	get = get_character_body
 
-
 var motion_vector: Vector3 = Vector3()
-var movement_vector: Vector3 = Vector3() # Movement for this frame
+var movement_vector: Vector3 = Vector3()  # Movement for this frame
+
 
 func set_global_origin(p_origin: Vector3, _p_update_physics: bool = false) -> void:
 	super.set_global_origin(p_origin, _p_update_physics)
@@ -67,9 +67,7 @@ func get_character_body() -> CharacterBody3D:
 func set_direction_normal(p_normal: Vector3) -> void:
 	if p_normal == Vector3():
 		return
-	set_global_transform(
-		get_global_transform().looking_at(get_global_origin() + p_normal, Vector3(0, 1, 0))
-	)
+	set_global_transform(get_global_transform().looking_at(get_global_origin() + p_normal, Vector3(0, 1, 0)))
 
 
 func get_direction_normal() -> Vector3:
@@ -83,17 +81,13 @@ func move(p_target_velocity: Vector3) -> void:
 				_character_body.velocity = p_target_velocity
 				_character_body.move_and_slide()
 				motion_vector = _character_body.velocity
-			set_global_transform(
-				Transform3D(
-					get_global_transform().basis, _character_body.global_transform.origin
-				)
-			)
+			set_global_transform(Transform3D(get_global_transform().basis, _character_body.global_transform.origin))
 
 
 func set_movement_vector(p_target_velocity: Vector3) -> void:
 	movement_vector = p_target_velocity
-	
-	
+
+
 func is_grounded() -> bool:
 	if _character_body:
 		return _character_body.is_on_floor()
@@ -115,17 +109,13 @@ func cache_nodes() -> void:
 	if has_node(_character_body_path):
 		_character_body = get_node_or_null(_character_body_path)
 
-		if (
-			_character_body == self
-			or not _character_body is CharacterBody3D
-		):
+		if _character_body == self or not _character_body is CharacterBody3D:
 			_character_body = null
+
 
 func _entity_ready() -> void:
 	super._entity_ready()
-	
+
 	if _character_body:
 		_character_body.set_as_top_level(true)
-		_character_body.global_transform = Transform3D(
-			Basis(), get_global_transform().origin
-		)
+		_character_body.global_transform = Transform3D(Basis(), get_global_transform().origin)

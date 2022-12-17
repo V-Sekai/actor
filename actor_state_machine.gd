@@ -29,29 +29,32 @@
 @tool
 extends "res://addons/state_machine/state_machine.gd"
 
-@export var actor_controller_path : NodePath = NodePath()
-var actor_controller: Node = null # of type actor_controller.gd
+@export var actor_controller_path: NodePath = NodePath()
+var actor_controller: Node = null  # of type actor_controller.gd
 
 var noclip: bool = false
 
+
 func _change_state(state_name: String) -> void:
-	## 
+	##
 	## 	The base state_machine interface this node extends does most of the work
-	## 	
+	##
 	if not _active:
 		return
 	super._change_state(state_name)
 
+
 # Input actions
-var input_direction: Vector3 = Vector3() :
+var input_direction: Vector3 = Vector3():
 	set = set_input_direction
 
-var input_magnitude: float = 0.0 :
+var input_magnitude: float = 0.0:
 	set = set_input_magnitude
 
 
 func is_noclipping() -> bool:
 	return noclip
+
 
 func get_vertical_input() -> float:
 	var vertical_input: float = 0.0
@@ -59,8 +62,9 @@ func get_vertical_input() -> float:
 		vertical_input += 1.0
 	if InputManager.is_ingame_action_pressed("fly_down"):
 		vertical_input -= 1.0
-		
+
 	return vertical_input
+
 
 func set_input_direction(p_input_direction: Vector3) -> void:
 	input_direction = p_input_direction
@@ -80,7 +84,7 @@ func get_input_magnitude() -> float:
 
 func is_attempting_movement() -> bool:
 	return input_direction.length() > 0.0 and input_magnitude > 0.0
-	
+
 
 func is_attempting_jumping() -> bool:
 	return InputManager.is_ingame_action_just_pressed("jump")
@@ -92,7 +96,7 @@ func get_actor_controller() -> Node:
 
 func is_grounded() -> bool:
 	return get_actor_controller().is_grounded()
-	
+
 
 func get_velocity() -> Vector3:
 	return get_actor_controller().get_velocity()
@@ -124,7 +128,7 @@ func update(p_delta: float) -> void:
 
 func start() -> void:
 	super.start()
-	if ! Engine.is_editor_hint():
+	if !Engine.is_editor_hint():
 		states_map = {
 			"Spawned": get_node_or_null("Spawned"),
 			"Idle": get_node_or_null("Idle"),

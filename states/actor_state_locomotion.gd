@@ -26,32 +26,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-extends "res://addons/actor/states/actor_state.gd" # actor_state.gd
+extends "res://addons/actor/states/actor_state.gd"  # actor_state.gd
+
 
 func locomotion() -> void:
-	if ! state_machine.is_attempting_movement():
+	if !state_machine.is_attempting_movement():
 		change_state("Stop")
 		return
 	else:
 		pass
-	
+
 	if !state_machine.is_grounded():
 		change_state("Falling")
 		return
 
 	var input_direction: Vector3 = state_machine.get_input_direction()
 
-	state_machine.set_velocity(
-		(
-			input_direction
-			* state_machine.actor_controller.walk_speed
-			* state_machine.get_input_magnitude()
-		)
-	)
-	
+	state_machine.set_velocity(input_direction * state_machine.actor_controller.walk_speed * state_machine.get_input_magnitude())
+
 	if state_machine.is_attempting_jumping():
 		change_state("Pre-Jump")
-	
+
 	state_machine.set_movement_vector(state_machine.get_velocity())
 
 

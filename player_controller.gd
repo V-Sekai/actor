@@ -242,10 +242,18 @@ func _get_desired_direction() -> Basis:
 		return Basis(
 			Vector3(-cos(basis.get_euler().y), 0.0, sin(basis.get_euler().y)),
 			Vector3(),
-			Vector3(sin(basis.get_euler().y) * cos(basis.get_euler().x), sin(basis.get_euler().x), cos(basis.get_euler().y) * cos(basis.get_euler().x))
+			Vector3(
+				sin(basis.get_euler().y) * cos(basis.get_euler().x),
+				sin(basis.get_euler().x),
+				cos(basis.get_euler().y) * cos(basis.get_euler().x)
+			)
 		)
 	else:
-		return Basis(Vector3(-cos(basis.get_euler().y), 0.0, sin(basis.get_euler().y)), Vector3(), Vector3(sin(basis.get_euler().y), 0.0, cos(basis.get_euler().y)))
+		return Basis(
+			Vector3(-cos(basis.get_euler().y), 0.0, sin(basis.get_euler().y)),
+			Vector3(),
+			Vector3(sin(basis.get_euler().y), 0.0, cos(basis.get_euler().y))
+		)
 
 
 func _on_touched_by_body(p_body) -> void:

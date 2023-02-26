@@ -115,8 +115,12 @@ func _local_avatar_path_updated(p_path: String) -> void:
 
 
 func _update_noclip_state() -> void:
-	_collider.disabled = false
-	_state_machine.noclip = false
+	if VSKDebugManager.noclip_mode:
+		_collider.disabled = true
+		_state_machine.noclip = true
+	else:
+		_collider.disabled = false
+		_state_machine.noclip = false
 
 
 func _noclip_changed() -> void:
@@ -138,7 +142,7 @@ func movement_is_locked() -> bool:
 
 
 func using_flight_controls() -> bool:
-	return false
+	return VSKDebugManager.noclip_mode
 
 
 func _master_movement(p_delta: float) -> void:
@@ -360,6 +364,8 @@ func _master_ready() -> void:
 	_player_input.setup_xr_camera()
 
 	_player_teleport_controller.setup(self)
+
+	assert(VSKDebugManager.noclip_changed.connect(self._noclip_changed) == OK)
 
 	if _character_body:
 		_character_body.collision_layer = local_player_collision

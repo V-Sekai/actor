@@ -18,7 +18,7 @@ environment = ExtResource("2_4cjpt")
 fov = 70.0
 
 [node name="DebugPanel" type="MeshInstance3D" parent="ARVRCamera"]
-transform = Transform3D(559.524, 0, 0, 0, -2.44576e-05, -559.524, 0, 1, -4.37114e-08, 0, 0, -400.045)
+transform = Transform3D(560.229, 0, 0, 0, 3.4303e-14, -560.229, 0, 1, 6.12303e-17, 0, 0, -400.045)
 visible = false
 mesh = SubResource("3")
 script = ExtResource("2")

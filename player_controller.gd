@@ -31,7 +31,6 @@ extends "res://addons/actor/actor_controller.gd"
 
 # Consts
 const vr_manager_const = preload("res://addons/sar1_vr_manager/vr_manager.gd")
-const pickup_controller_const = preload("res://addons/vsk_entities/extensions/pickup_controller.gd")
 
 @export var _target_node_path: NodePath = NodePath()
 @onready var _target_node: Node3D = get_node_or_null(_target_node_path)
@@ -197,11 +196,6 @@ func _on_target_smooth_transform_complete(p_delta) -> void:
 
 func cache_nodes() -> void:
 	super.cache_nodes()
-
-	# Node caching
-	_player_pickup_controller = get_node_or_null(_player_pickup_controller_path)
-	_player_pickup_controller.player_controller = self
-
 	_player_teleport_controller = get_node_or_null(_player_teleport_controller_path)
 	_player_info_tag_controller = get_node_or_null(_player_info_tag_controller_path)
 	_player_hand_controller = get_node_or_null(_player_hand_controller_path)
@@ -268,10 +262,6 @@ func entity_child_pre_remove(p_entity_child: Node) -> void:
 
 func get_attachment_node(p_attachment_id: int) -> Node:
 	match p_attachment_id:
-		pickup_controller_const.LEFT_HAND_ID:
-			return _avatar_display.left_hand_bone_attachment
-		pickup_controller_const.RIGHT_HAND_ID:
-			return _avatar_display.right_hand_bone_attachment
 		_:
 			return _render_node
 

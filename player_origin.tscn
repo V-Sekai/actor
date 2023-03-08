@@ -8,7 +8,7 @@
 [sub_resource type="CameraAttributesPhysical" id="CameraAttributesPhysical_e7u4j"]
 auto_exposure_enabled = true
 frustum_focal_length = 22.0
-auto_exposure_min_exposure_value = 4.0
+auto_exposure_min_exposure_value = 2.0
 
 [sub_resource type="PlaneMesh" id="3"]
 size = Vector2(1, 1)

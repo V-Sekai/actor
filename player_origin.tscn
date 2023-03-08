@@ -6,8 +6,9 @@
 [ext_resource type="Script" path="res://addons/xr_vignette/vignette_controller.gd" id="7_imwy0"]
 
 [sub_resource type="CameraAttributesPhysical" id="CameraAttributesPhysical_e7u4j"]
+auto_exposure_enabled = true
 frustum_focal_length = 22.0
-auto_exposure_max_exposure_value = 4.0
+auto_exposure_min_exposure_value = 4.0
 
 [sub_resource type="PlaneMesh" id="3"]
 size = Vector2(1, 1)
@@ -22,7 +23,7 @@ environment = ExtResource("2_4cjpt")
 attributes = SubResource("CameraAttributesPhysical_e7u4j")
 
 [node name="DebugPanel" type="MeshInstance3D" parent="ARVRCamera"]
-transform = Transform3D(560.229, 0, 0, 0, 3.43041e-14, -560.229, 0, 1, 6.12323e-17, 0, 0, -400.045)
+transform = Transform3D(436.413, 0, 0, 0, 2.67226e-14, -436.413, 0, 1, 6.12323e-17, 0, 0, -400.045)
 visible = false
 mesh = SubResource("3")
 script = ExtResource("2")

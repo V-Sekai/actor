@@ -32,11 +32,3 @@ distance = 0.1
 [node name="VignetteController" type="Node3D" parent="ARVRCamera"]
 process_priority = 1000000
 script = ExtResource("7_imwy0")
-enable_cage = false
-fade_fov = 20.0
-running_average_interval = 0.0
-fadeout_delay = 0.5
-vignette_move_thresh = Vector2(0.01, 0.02)
-move_vignette_fov_deg = 30.0
-vignette_rotate_thresh_deg = Vector2(0, 0.2)
-rotate_vignette_fov_deg = 40.0
